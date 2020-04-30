@@ -37,7 +37,7 @@ resource "null_resource" "lb_provisioner" {
       "sudo apt-get install -y nginx libnginx-mod-stream",
       "sudo mv /tmp/nginx.conf /etc/nginx/nginx.conf",
       "sudo mv /tmp/kubeadm.conf /home/ubuntu/kubeadmconfig.yaml",
-      "sudo mv /tmp/kubeadm-init.sh /home/ubuntu/kubeadmconfig.kubeadm-init.sh",
+      "sudo mv /tmp/kubeadm-init.sh /home/ubuntu/kubeadm-init.sh",
       "sudo systemctl restart nginx",
       "sleep 20",
     ]
