@@ -25,8 +25,10 @@ resource "null_resource" "lb_provisioner" {
 
   provisioner "file" {
     content = templatefile("config/kubeadm-init.sh", {
-      master_1_ip = values(openstack_compute_instance_v2.ske_master)[0].access_ip_v4
-      master_2_ip = values(openstack_compute_instance_v2.ske_master)[1].access_ip_v4
+      master_1_ip            = values(openstack_compute_instance_v2.ske_master)[0].access_ip_v4
+      master_2_ip            = values(openstack_compute_instance_v2.ske_master)[1].access_ip_v4
+      control_plane_endpoint = var.control_plane_endpoint
+      lb_ip_v6               = trim(openstack_compute_instance_v2.ske_loadbalancer.access_ip_v6, "[]")
     })
     destination = "/tmp/kubeadm-init.sh"
   }
@@ -36,10 +38,10 @@ resource "null_resource" "lb_provisioner" {
       "sudo apt-get install -y nginx",
       "sudo apt-get install -y nginx libnginx-mod-stream",
       "sudo mv /tmp/nginx.conf /etc/nginx/nginx.conf",
+      "sudo systemctl restart nginx",
       "sudo mv /tmp/kubeadm.conf /home/ubuntu/kubeadmconfig.yaml",
       "sudo mv /tmp/kubeadm-init.sh /home/ubuntu/kubeadm-init.sh",
-      "sudo systemctl restart nginx",
-      "sleep 20",
+      "sleep 10",
     ]
   }
 }

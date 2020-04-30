@@ -1,7 +1,7 @@
 # provider vars
 gcp_auth_json_path = "./auth/ske-dns-admin.json"
 
-control_plane_endpoint = "cp6"
+control_plane_endpoint = "cp6.gardener.ganter.dev"
 
 
 # instance vars

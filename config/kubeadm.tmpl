@@ -1,7 +1,7 @@
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: ClusterConfiguration
 kubernetesVersion: v1.17.4
-controlPlaneEndpoint: ${control_plane_endpoint}.gardner.ganter.dev:6443
+controlPlaneEndpoint: ${control_plane_endpoint}:6443
 networking:
   serviceSubnet: "172.16.0.0/16,fd02::/112"
   podSubnet: "172.17.0.0/16,fd02::100:0/112"
