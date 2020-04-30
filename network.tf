@@ -137,9 +137,8 @@ resource "openstack_compute_floatingip_v2" "fip" {
 }
 
 resource "openstack_compute_floatingip_associate_v2" "fip_associate" {
-  for_each    = var.lb_names
   floating_ip = openstack_compute_floatingip_v2.fip.address
-  instance_id = openstack_compute_instance_v2.ske_loadbalancer[each.key].id
+  instance_id = openstack_compute_instance_v2.ske_loadbalancer.id
 }
 
 # data to get existing network id

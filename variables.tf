@@ -1,14 +1,10 @@
-# provider vars
-variable "username" {
-  description = "openstack username for provider auth"
+# gcp
+variable "gcp_auth_json_path" {
+  description = "google cloud auth.json path"
 }
-
-variable "password" {
-  description = "openstack password for provider auth"
-}
-
-variable "tenant_name" {
-  description = "openstack project name"
+# k8s vars
+variable "control_plane_endpoint" {
+  type = string
 }
 
 # instance vars
@@ -20,6 +16,10 @@ variable "flavor_name" {
   type = string
 }
 
+variable "private_key_path" {
+  type = string
+}
+
 variable "master_node_names" {
   type = set(string)
 }
@@ -28,8 +28,8 @@ variable "worker_node_names" {
   type = set(string)
 }
 
-variable "lb_names" {
-  type = set(string)
+variable "lb_name" {
+  type = string
 }
 
 # network vars

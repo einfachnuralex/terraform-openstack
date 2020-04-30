@@ -1,0 +1,20 @@
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+kubernetesVersion: v1.17.4
+controlPlaneEndpoint: ${control_plane_endpoint}.gardner.ganter.dev:6443
+networking:
+  serviceSubnet: "172.16.0.0/16,fd02::/112"
+  podSubnet: "172.17.0.0/16,fd02::100:0/112"
+  dnsDomain: "cluster.local"
+featureGates:
+  IPv6DualStack: true
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+featureGates:
+  IPv6DualStack: true
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+featureGates:
+  IPv6DualStack: true

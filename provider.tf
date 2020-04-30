@@ -1,10 +1,8 @@
-provider "openstack" {
-  auth_url = "https://platform.cloud.schwarz:5000/v3"
-  region   = "RegionOne"
+# provider (source openrc)
+provider "openstack" {}
 
-  user_domain_name = "Default"
-  user_name        = var.username
-  password         = var.password
-
-  tenant_name = var.tenant_name
+provider "google" {
+  credentials = file(var.gcp_auth_json_path)
+  project     = "gardener-test"
+  region      = "eu-central1"
 }

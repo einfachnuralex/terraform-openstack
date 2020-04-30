@@ -1,9 +1,13 @@
 # provider vars
-tenant_name = "ske-testing"
+gcp_auth_json_path = "./auth/ske-dns-admin.json"
+
+control_plane_endpoint = "cp6"
+
 
 # instance vars
-image_id    = "41c4c9fc-c8d7-4475-8989-8103b0484128"
-flavor_name = "c1.2"
+private_key_path = "./auth/ske-key"
+image_id         = "41c4c9fc-c8d7-4475-8989-8103b0484128"
+flavor_name      = "c1.2"
 master_node_names = [
   "master_1",
   "master_2",
@@ -13,9 +17,7 @@ worker_node_names = [
   "worker_1",
   "worker_2"
 ]
-lb_names = [
-  "lb_1"
-]
+lb_name = "lb_1"
 
 # network vars
 network_prefix  = "network"
