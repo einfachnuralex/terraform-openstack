@@ -35,6 +35,11 @@ ext_ports = {
   }
 }
 int_ports = {
+  ssh = {
+    min      = 22
+    max      = 22
+    protocol = "tcp"
+  },
   etcd = {
     min      = 2379
     max      = 2380

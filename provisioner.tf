@@ -16,6 +16,29 @@ resource "null_resource" "lb_provisioner" {
     destination = "/tmp/nginx.conf"
   }
 
+  provisioner "remote-exec" {
+    inline = [
+      "sudo apt-get install -y nginx",
+      "sudo apt-get install -y nginx libnginx-mod-stream",
+      "sudo mv /tmp/nginx.conf /etc/nginx/nginx.conf",
+      "sudo systemctl restart nginx",
+      "echo 'ForwardAgent yes' >> ~/.ssh/config",
+      "sleep 1",
+    ]
+  }
+}
+
+resource "null_resource" "first_master" {
+  depends_on = [null_resource.lb_provisioner]
+  connection {
+    type         = "ssh"
+    bastion_host = openstack_compute_floatingip_v2.fip.address
+    host         = values(openstack_compute_instance_v2.ske_master)[0].access_ip_v4
+    user         = "ubuntu"
+    private_key  = file(var.private_key_path)
+    timeout      = "5m"
+  }
+
   provisioner "file" {
     content = templatefile("config/kubeadm.tmpl", {
       control_plane_endpoint = var.control_plane_endpoint
@@ -35,38 +58,34 @@ resource "null_resource" "lb_provisioner" {
 
   provisioner "remote-exec" {
     inline = [
-      "sudo apt-get install -y nginx",
-      "sudo apt-get install -y nginx libnginx-mod-stream",
-      "sudo mv /tmp/nginx.conf /etc/nginx/nginx.conf",
-      "sudo systemctl restart nginx",
+      "echo 'ForwardAgent yes' >> ~/.ssh/config",
       "sudo mv /tmp/kubeadm.conf /home/ubuntu/kubeadmconfig.yaml",
       "sudo mv /tmp/kubeadm-init.sh /home/ubuntu/kubeadm-init.sh",
-      "sleep 10",
+      "sudo chmod +x kubeadm-init.sh",
+      "./kubeadm-init.sh",
     ]
   }
 }
 
-resource "null_resource" "kubeadm_provisioner" {
-  depends_on = [null_resource.lb_provisioner]
+resource "null_resource" "master_join" {
+  depends_on = [null_resource.first_master]
+  for_each   = var.master_nodes_names
   connection {
-    type        = "ssh"
-    host        = openstack_compute_floatingip_v2.fip.address
-    user        = "ubuntu"
-    private_key = file(var.private_key_path)
-    timeout     = "5m"
+    type         = "ssh"
+    bastion_host = openstack_compute_floatingip_v2.fip.address
+    host         = values(openstack_compute_instance_v2.ske_master)[0].access_ip_v4
+    user         = "ubuntu"
+    private_key  = file(var.private_key_path)
+    timeout      = "5m"
   }
-
-  /*   provisioner "file" {
-    content = templatefile("config/nginx.tmpl", {
-      ip_addrs = [for instance in openstack_compute_instance_v2.ske_master : instance.access_ip_v6],
-      port     = 6443
-    })
-    destination = "/tmp/nginx.conf"
-  } */
 
   provisioner "remote-exec" {
     inline = [
-      "echo lol"
+      "echo 'ForwardAgent yes' >> ~/.ssh/config",
+      "sudo mv /tmp/kubeadm.conf /home/ubuntu/kubeadmconfig.yaml",
+      "sudo mv /tmp/kubeadm-init.sh /home/ubuntu/kubeadm-init.sh",
+      "sudo chmod +x kubeadm-init.sh",
+      "./kubeadm-init.sh",
     ]
   }
 }
