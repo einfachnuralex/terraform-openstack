@@ -48,8 +48,8 @@ resource "null_resource" "first_master" {
 
   provisioner "file" {
     content = templatefile("config/kubeadm-init.sh", {
-      master_1_ip            = values(openstack_compute_instance_v2.ske_master)[0].access_ip_v4
-      master_2_ip            = values(openstack_compute_instance_v2.ske_master)[1].access_ip_v4
+      master_ips             = [for instance in openstack_compute_instance_v2.ske_master : instance.access_ip_v6]
+      worker_ips             = [for instance in openstack_compute_instance_v2.ske_worker : instance.access_ip_v6]
       control_plane_endpoint = var.control_plane_endpoint
       lb_ip_v6               = trim(openstack_compute_instance_v2.ske_loadbalancer.access_ip_v6, "[]")
     })
@@ -63,17 +63,18 @@ resource "null_resource" "first_master" {
       "sudo mv /tmp/kubeadm-init.sh /home/ubuntu/kubeadm-init.sh",
       "sudo chmod +x kubeadm-init.sh",
       "./kubeadm-init.sh",
+      "sleep 1",
     ]
   }
 }
 
 resource "null_resource" "master_join" {
   depends_on = [null_resource.first_master]
-  for_each   = var.master_nodes_names
+  for_each   = var.master_node_names
   connection {
     type         = "ssh"
     bastion_host = openstack_compute_floatingip_v2.fip.address
-    host         = values(openstack_compute_instance_v2.ske_master)[0].access_ip_v4
+    host         = openstack_compute_instance_v2.ske_master[each.key].access_ip_v4
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
     timeout      = "5m"
@@ -81,11 +82,30 @@ resource "null_resource" "master_join" {
 
   provisioner "remote-exec" {
     inline = [
-      "echo 'ForwardAgent yes' >> ~/.ssh/config",
-      "sudo mv /tmp/kubeadm.conf /home/ubuntu/kubeadmconfig.yaml",
-      "sudo mv /tmp/kubeadm-init.sh /home/ubuntu/kubeadm-init.sh",
-      "sudo chmod +x kubeadm-init.sh",
-      "./kubeadm-init.sh",
+      "sudo chmod +x master_join.sh",
+      "sudo ./master_join.sh",
+      "sleep 1",
+    ]
+  }
+}
+
+resource "null_resource" "worker_join" {
+  depends_on = [null_resource.master_join]
+  for_each   = var.master_node_names
+  connection {
+    type         = "ssh"
+    bastion_host = openstack_compute_floatingip_v2.fip.address
+    host         = openstack_compute_instance_v2.ske_master[each.key].access_ip_v4
+    user         = "ubuntu"
+    private_key  = file(var.private_key_path)
+    timeout      = "5m"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo chmod +x worker_join.sh",
+      "sudo ./worker_join.sh",
+      "sleep 1",
     ]
   }
 }

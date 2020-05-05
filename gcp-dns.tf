@@ -14,3 +14,4 @@ data "google_dns_managed_zone" "dns_zone" {
 output "blaah" {
   value = trim(openstack_compute_instance_v2.ske_loadbalancer.access_ip_v6, "[]")
 }
+
