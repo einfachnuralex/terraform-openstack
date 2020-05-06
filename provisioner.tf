@@ -46,20 +46,21 @@ resource "null_resource" "first_master" {
     destination = "/tmp/kubeadm.conf"
   }
 
+  provisioner "remote-exec" {
+    script = "config/update.sh"
+  }
+
   provisioner "file" {
     content = templatefile("config/kubeadm-init.sh", {
-      master_ips             = [for instance in openstack_compute_instance_v2.ske_master : instance.access_ip_v6]
-      worker_ips             = [for instance in openstack_compute_instance_v2.ske_worker : instance.access_ip_v6]
+      master_ips             = [for instance in openstack_compute_instance_v2.ske_master : instance.access_ip_v4]
+      worker_ips             = [for instance in openstack_compute_instance_v2.ske_worker : instance.access_ip_v4]
       control_plane_endpoint = var.control_plane_endpoint
-      lb_ip_v6               = trim(openstack_compute_instance_v2.ske_loadbalancer.access_ip_v6, "[]")
     })
     destination = "/tmp/kubeadm-init.sh"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
-      "sudo apt-get update",
       "echo 'ForwardAgent yes' >> ~/.ssh/config",
       "sudo mv /tmp/kubeadm.conf ~/kubeadmconfig.yaml",
       "sudo mv /tmp/kubeadm-init.sh ~/kubeadm-init.sh",
@@ -83,9 +84,11 @@ resource "null_resource" "master_join" {
   }
 
   provisioner "remote-exec" {
+    script = "config/update.sh"
+  }
+
+  provisioner "remote-exec" {
     inline = [
-      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
-      "sudo apt-get update",
       "sudo chmod +x master_join.sh",
       "sudo ./master_join.sh",
       "sleep 1",
@@ -99,16 +102,18 @@ resource "null_resource" "worker_join" {
   connection {
     type         = "ssh"
     bastion_host = openstack_compute_floatingip_v2.fip.address
-    host         = openstack_compute_instance_v2.ske_master[each.key].access_ip_v4
+    host         = openstack_compute_instance_v2.ske_worker[each.key].access_ip_v4
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
     timeout      = "5m"
   }
 
   provisioner "remote-exec" {
+    script = "config/update.sh"
+  }
+
+  provisioner "remote-exec" {
     inline = [
-      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
-      "sudo apt-get update",
       "sudo chmod +x worker_join.sh",
       "sudo ./worker_join.sh",
       "sleep 1",
