@@ -58,9 +58,11 @@ resource "null_resource" "first_master" {
 
   provisioner "remote-exec" {
     inline = [
+      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
+      "sudo apt-get update",
       "echo 'ForwardAgent yes' >> ~/.ssh/config",
-      "sudo mv /tmp/kubeadm.conf /home/ubuntu/kubeadmconfig.yaml",
-      "sudo mv /tmp/kubeadm-init.sh /home/ubuntu/kubeadm-init.sh",
+      "sudo mv /tmp/kubeadm.conf ~/kubeadmconfig.yaml",
+      "sudo mv /tmp/kubeadm-init.sh ~/kubeadm-init.sh",
       "sudo chmod +x kubeadm-init.sh",
       "./kubeadm-init.sh",
       "sleep 1",
@@ -82,6 +84,8 @@ resource "null_resource" "master_join" {
 
   provisioner "remote-exec" {
     inline = [
+      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
+      "sudo apt-get update",
       "sudo chmod +x master_join.sh",
       "sudo ./master_join.sh",
       "sleep 1",
@@ -103,6 +107,8 @@ resource "null_resource" "worker_join" {
 
   provisioner "remote-exec" {
     inline = [
+      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
+      "sudo apt-get update",
       "sudo chmod +x worker_join.sh",
       "sudo ./worker_join.sh",
       "sleep 1",
