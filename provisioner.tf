@@ -46,10 +46,6 @@ resource "null_resource" "first_master" {
     destination = "/tmp/kubeadm.conf"
   }
 
-  provisioner "remote-exec" {
-    script = "config/update.sh"
-  }
-
   provisioner "file" {
     content = templatefile("config/kubeadm-init.sh", {
       master_ips             = [for instance in openstack_compute_instance_v2.ske_master : instance.access_ip_v4]
@@ -84,10 +80,6 @@ resource "null_resource" "master_join" {
   }
 
   provisioner "remote-exec" {
-    script = "config/update.sh"
-  }
-
-  provisioner "remote-exec" {
     inline = [
       "sudo chmod +x master_join.sh",
       "sudo ./master_join.sh",
@@ -98,7 +90,7 @@ resource "null_resource" "master_join" {
 
 resource "null_resource" "worker_join" {
   depends_on = [null_resource.master_join]
-  for_each   = var.master_node_names
+  for_each   = var.worker_node_names
   connection {
     type         = "ssh"
     bastion_host = openstack_compute_floatingip_v2.fip.address
@@ -106,10 +98,6 @@ resource "null_resource" "worker_join" {
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
     timeout      = "5m"
-  }
-
-  provisioner "remote-exec" {
-    script = "config/update.sh"
   }
 
   provisioner "remote-exec" {

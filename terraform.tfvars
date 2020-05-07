@@ -1,12 +1,12 @@
 # provider vars
-gcp_auth_json_path = "./auth/ske-dns-admin.json"
+gcp_auth_json_path = "auth/ske-dns-admin.json"
 
 control_plane_endpoint = "cp6.gardener.ganter.dev"
 
 
 # instance vars
-private_key_path = "./auth/ske-key"
-image_id         = "41c4c9fc-c8d7-4475-8989-8103b0484128"
+private_key_path = "auth/ske-key"
+image_id         = "38e194d3-16b9-43a7-af1d-9ffcaa98c746"
 flavor_name      = "c1.2"
 master_node_names = [
   "master_1",

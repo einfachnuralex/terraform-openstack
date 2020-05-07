@@ -10,8 +10,3 @@ resource "google_dns_record_set" "loadbalancer" {
 data "google_dns_managed_zone" "dns_zone" {
   name = "gardener-test-2"
 }
-
-output "blaah" {
-  value = trim(openstack_compute_instance_v2.ske_loadbalancer.access_ip_v6, "[]")
-}
-
