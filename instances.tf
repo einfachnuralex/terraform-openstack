@@ -16,11 +16,11 @@ resource "openstack_compute_instance_v2" "ske_master" {
   }
 
   network {
-    name = openstack_networking_network_v2.network_ip4.name
+    name = openstack_networking_network_v2.network_ip4.id
   }
 
   network {
-    name = openstack_networking_network_v2.network_ip6.name
+    name = openstack_networking_network_v2.network_ip6.id
   }
 }
 
@@ -41,11 +41,11 @@ resource "openstack_compute_instance_v2" "ske_worker" {
   }
 
   network {
-    name = openstack_networking_network_v2.network_ip4.name
+    name = openstack_networking_network_v2.network_ip4.id
   }
 
   network {
-    name = openstack_networking_network_v2.network_ip6.name
+    name = openstack_networking_network_v2.network_ip6.id
   }
 }
 
@@ -65,11 +65,11 @@ resource "openstack_compute_instance_v2" "ske_loadbalancer" {
   }
 
   network {
-    name = openstack_networking_network_v2.network_ip4.name
+    name = openstack_networking_network_v2.network_ip4.id
   }
 
   network {
-    name = openstack_networking_network_v2.network_ip6.name
+    name = openstack_networking_network_v2.network_ip6.id
   }
 }
 

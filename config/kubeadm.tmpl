@@ -4,13 +4,14 @@ kubernetesVersion: v1.18.2
 controlPlaneEndpoint: ${control_plane_endpoint}:6443
 networking:
   serviceSubnet: "172.16.0.0/16,fd02::/112"
-  podSubnet: "172.17.0.0/16,fd02::100:0/112"
+  podSubnet: "172.18.0.0/16,fd02::100:0/112"
   dnsDomain: "cluster.local"
 featureGates:
   IPv6DualStack: true
 ---
 apiVersion: kubeproxy.config.k8s.io/v1alpha1
 kind: KubeProxyConfiguration
+mode: ipvs
 featureGates:
   IPv6DualStack: true
 ---
