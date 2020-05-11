@@ -1,8 +1,5 @@
-## gcp ##
-gcp_auth_json_path = "auth/ske-dns-admin.json"
-
 ## k8s ##
-control_plane_endpoint = "cp6.gardener.ganter.dev"
+// control_plane_endpoint = 
 
 ## instance ##
 master_node_names = [
@@ -16,11 +13,11 @@ worker_node_names = [
   "worker_2"
 ]
 
-lb_name          = "lb_1"
-image_id         = "38e194d3-16b9-43a7-af1d-9ffcaa98c746"
-flavor_name      = "c1.2"
-key_pair_name    = ""
-private_key_path = "auth/ske-key"
+lb_name     = "lb_1"
+image_id    = "38e194d3-16b9-43a7-af1d-9ffcaa98c746" // ubuntu_k8s_1.18.2_docker
+flavor_name = "c1.2"
+// key_pair_name    = 
+// private_key_path =
 
 ## network ##
 network_prefix  = "network"

@@ -1,8 +1,3 @@
-## gcp ##
-variable "gcp_auth_json_path" {
-  description = "google cloud auth.json path"
-}
-
 ## k8s ##
 variable "control_plane_endpoint" {
   type = string
@@ -35,7 +30,8 @@ variable "key_pair_name" {
 }
 
 variable "private_key_path" {
-  type = string
+  type        = string
+  description = "path to private-key, to grand access for terraform provisioner"
 }
 
 ## network ##
