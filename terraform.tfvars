@@ -1,25 +1,28 @@
-# provider vars
+## gcp ##
 gcp_auth_json_path = "auth/ske-dns-admin.json"
 
+## k8s ##
 control_plane_endpoint = "cp6.gardener.ganter.dev"
 
-
-# instance vars
-private_key_path = "auth/ske-key"
-image_id         = "38e194d3-16b9-43a7-af1d-9ffcaa98c746"
-flavor_name      = "c1.2"
+## instance ##
 master_node_names = [
   "master_1",
   "master_2",
   "master_3"
 ]
+
 worker_node_names = [
   "worker_1",
   "worker_2"
 ]
-lb_name = "lb_1"
 
-# network vars
+lb_name          = "lb_1"
+image_id         = "38e194d3-16b9-43a7-af1d-9ffcaa98c746"
+flavor_name      = "c1.2"
+key_pair_name    = ""
+private_key_path = "auth/ske-key"
+
+## network ##
 network_prefix  = "network"
 secgroup_prefix = "secgroup"
 ext_ports = {
@@ -34,6 +37,7 @@ ext_ports = {
     protocol = "tcp"
   }
 }
+
 int_ports = {
   ssh = {
     min      = 22
