@@ -22,12 +22,17 @@ resource "openstack_networking_port_v2" "lb_port_v4" {
 }
 
 resource "openstack_networking_port_v2" "lb_port_v6" {
-  name           = "${var.network_prefix}-lb-port-v6"
-  network_id     = openstack_networking_network_v2.network_v6.id
-  admin_state_up = "true"
+  name               = "${var.network_prefix}-lb-port-v6"
+  network_id         = openstack_networking_network_v2.network_v6.id
+  security_group_ids = [openstack_networking_secgroup_v2.external.id]
+  admin_state_up     = "true"
 
   fixed_ip {
     subnet_id = openstack_networking_subnet_v2.subnet_v6.id
+  }
+
+  allowed_address_pairs {
+    ip_address = var.allowed_address_pairs_cidr
   }
 }
 
@@ -41,6 +46,10 @@ resource "openstack_networking_port_v2" "port_v4" {
   fixed_ip {
     subnet_id = openstack_networking_subnet_v2.subnet_v4.id
   }
+
+  allowed_address_pairs {
+    ip_address = var.allowed_address_pairs_cidr
+  }
 }
 
 resource "openstack_networking_port_v2" "port_v6" {
@@ -52,6 +61,10 @@ resource "openstack_networking_port_v2" "port_v6" {
 
   fixed_ip {
     subnet_id = openstack_networking_subnet_v2.subnet_v6.id
+  }
+
+  allowed_address_pairs {
+    ip_address = var.allowed_address_pairs_cidr
   }
 }
 

@@ -4,7 +4,7 @@ resource "google_dns_record_set" "loadbalancer" {
   ttl  = 300
 
   managed_zone = data.google_dns_managed_zone.dns_zone.name
-  rrdatas      = [trim(openstack_compute_instance_v2.ske_loadbalancer.access_ip_v6, "[]")]
+  rrdatas      = [trim(openstack_compute_instance_v2.loadbalancer.access_ip_v6, "[]")]
 }
 
 data "google_dns_managed_zone" "dns_zone" {

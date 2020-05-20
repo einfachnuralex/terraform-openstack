@@ -42,6 +42,10 @@ variable "secgroup_prefix" {
   type = string
 }
 
+variable allowed_address_pairs_cidr {
+  type = string
+}
+
 variable "ext_ports" {
   type = map(object({
     min      = number
