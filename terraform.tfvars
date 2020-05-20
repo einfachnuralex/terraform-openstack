@@ -27,11 +27,6 @@ ext_ports = {
     min      = 22
     max      = 22
     protocol = "tcp"
-  },
-  api = {
-    min      = 6443
-    max      = 6443
-    protocol = "tcp"
   }
 }
 
@@ -70,10 +65,5 @@ int_ports = {
     min      = 30000
     max      = 32767
     protocol = "tcp"
-  },
-  node_port_udp = {
-    min      = 30000
-    max      = 32767
-    protocol = "udp"
   }
 }

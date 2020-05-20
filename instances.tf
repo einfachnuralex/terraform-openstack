@@ -1,10 +1,9 @@
-# instance section
-resource "openstack_compute_instance_v2" "ske_master" {
-  for_each        = var.master_node_names
-  name            = each.key
-  flavor_id       = data.openstack_compute_flavor_v2.flavor.id
-  key_pair        = var.key_pair_name
-  security_groups = [openstack_networking_secgroup_v2.internal.id]
+# Instance creation
+resource "openstack_compute_instance_v2" "loadbalancer" {
+  name      = var.lb_name
+  image_id  = var.image_id
+  flavor_id = data.openstack_compute_flavor_v2.flavor.id
+  key_pair  = var.key_pair_name
 
   block_device {
     uuid                  = var.image_id
@@ -16,20 +15,20 @@ resource "openstack_compute_instance_v2" "ske_master" {
   }
 
   network {
-    name = openstack_networking_network_v2.network_ip4.id
+    port = openstack_networking_port_v2.lb_port_v4.id
   }
 
   network {
-    name = openstack_networking_network_v2.network_ip6.id
+    port = openstack_networking_port_v2.lb_port_v6.id
   }
 }
 
-resource "openstack_compute_instance_v2" "ske_worker" {
-  for_each        = var.worker_node_names
-  name            = each.key
-  flavor_id       = data.openstack_compute_flavor_v2.flavor.id
-  key_pair        = var.key_pair_name
-  security_groups = [openstack_networking_secgroup_v2.internal.id]
+resource "openstack_compute_instance_v2" "master_nodes" {
+  for_each  = var.master_node_names
+  name      = each.key
+  image_id  = var.image_id
+  flavor_id = data.openstack_compute_flavor_v2.flavor.id
+  key_pair  = var.key_pair_name
 
   block_device {
     uuid                  = var.image_id
@@ -41,19 +40,20 @@ resource "openstack_compute_instance_v2" "ske_worker" {
   }
 
   network {
-    name = openstack_networking_network_v2.network_ip4.id
+    port = openstack_networking_port_v2.port_v4[each.key].id
   }
 
   network {
-    name = openstack_networking_network_v2.network_ip6.id
+    port = openstack_networking_port_v2.port_v6[each.key].id
   }
 }
 
-resource "openstack_compute_instance_v2" "ske_loadbalancer" {
-  name            = var.lb_name
-  flavor_id       = data.openstack_compute_flavor_v2.flavor.id
-  key_pair        = var.key_pair_name
-  security_groups = [openstack_networking_secgroup_v2.external.id]
+resource "openstack_compute_instance_v2" "worker_nodes" {
+  for_each  = var.worker_node_names
+  name      = each.key
+  image_id  = var.image_id
+  flavor_id = data.openstack_compute_flavor_v2.flavor.id
+  key_pair  = var.key_pair_name
 
   block_device {
     uuid                  = var.image_id
@@ -65,11 +65,11 @@ resource "openstack_compute_instance_v2" "ske_loadbalancer" {
   }
 
   network {
-    name = openstack_networking_network_v2.network_ip4.id
+    port = openstack_networking_port_v2.port_v4[each.key].id
   }
 
   network {
-    name = openstack_networking_network_v2.network_ip6.id
+    port = openstack_networking_port_v2.port_v6[each.key].id
   }
 }
 

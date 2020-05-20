@@ -1,5 +1,5 @@
 resource "null_resource" "lb_provisioner" {
-  depends_on = [openstack_compute_floatingip_associate_v2.fip_associate]
+  depends_on = [openstack_networking_floatingip_associate_v2.fip_associate]
   connection {
     type        = "ssh"
     host        = openstack_compute_floatingip_v2.fip.address
@@ -10,7 +10,7 @@ resource "null_resource" "lb_provisioner" {
 
   provisioner "file" {
     content = templatefile("config/nginx.tmpl", {
-      ip_addrs = [for instance in openstack_compute_instance_v2.ske_master : instance.access_ip_v6],
+      ip_addrs = [for instance in openstack_compute_instance_v2.master_nodes : instance.access_ip_v6],
       port     = 6443
     })
     destination = "/tmp/nginx.conf"
@@ -33,7 +33,7 @@ resource "null_resource" "first_master" {
   connection {
     type         = "ssh"
     bastion_host = openstack_compute_floatingip_v2.fip.address
-    host         = values(openstack_compute_instance_v2.ske_master)[0].access_ip_v4
+    host         = values(openstack_compute_instance_v2.master_nodes)[0].access_ip_v4
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
     timeout      = "5m"
@@ -48,8 +48,8 @@ resource "null_resource" "first_master" {
 
   provisioner "file" {
     content = templatefile("config/kubeadm-init.sh", {
-      master_ips             = [for instance in openstack_compute_instance_v2.ske_master : instance.access_ip_v4]
-      worker_ips             = [for instance in openstack_compute_instance_v2.ske_worker : instance.access_ip_v4]
+      master_ips             = [for instance in openstack_compute_instance_v2.master_nodes : instance.access_ip_v4]
+      worker_ips             = [for instance in openstack_compute_instance_v2.worker_nodes : instance.access_ip_v4]
       control_plane_endpoint = var.control_plane_endpoint
     })
     destination = "/tmp/kubeadm-init.sh"
@@ -73,7 +73,7 @@ resource "null_resource" "master_join" {
   connection {
     type         = "ssh"
     bastion_host = openstack_compute_floatingip_v2.fip.address
-    host         = openstack_compute_instance_v2.ske_master[each.key].access_ip_v4
+    host         = openstack_compute_instance_v2.master_nodes[each.key].access_ip_v4
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
     timeout      = "5m"
@@ -94,7 +94,7 @@ resource "null_resource" "worker_join" {
   connection {
     type         = "ssh"
     bastion_host = openstack_compute_floatingip_v2.fip.address
-    host         = openstack_compute_instance_v2.ske_worker[each.key].access_ip_v4
+    host         = openstack_compute_instance_v2.worker_nodes[each.key].access_ip_v4
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
     timeout      = "5m"

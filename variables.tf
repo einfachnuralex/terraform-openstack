@@ -15,7 +15,6 @@ variable "worker_node_names" {
 variable "lb_name" {
   type = string
 }
-
 variable "image_id" {
   type = string
 }

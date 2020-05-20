@@ -1,28 +1,72 @@
-#### NETWORK CONFIGURATION ####
-
 # Network creation
-resource "openstack_networking_network_v2" "network_ip4" {
-  name           = "${var.network_prefix}-ipv4"
+resource "openstack_networking_network_v2" "network_v4" {
+  name           = "${var.network_prefix}-v4"
   admin_state_up = "true"
 }
 
-resource "openstack_networking_network_v2" "network_ip6" {
-  name           = "${var.network_prefix}-ipv6"
+resource "openstack_networking_network_v2" "network_v6" {
+  name           = "${var.network_prefix}-v6"
   admin_state_up = "true"
+}
+
+# Port creation
+resource "openstack_networking_port_v2" "lb_port_v4" {
+  name               = "${var.network_prefix}-lb-port-v4"
+  network_id         = openstack_networking_network_v2.network_v4.id
+  security_group_ids = [openstack_networking_secgroup_v2.external.id]
+  admin_state_up     = "true"
+
+  fixed_ip {
+    subnet_id = openstack_networking_subnet_v2.subnet_v4.id
+  }
+}
+
+resource "openstack_networking_port_v2" "lb_port_v6" {
+  name           = "${var.network_prefix}-lb-port-v6"
+  network_id     = openstack_networking_network_v2.network_v6.id
+  admin_state_up = "true"
+
+  fixed_ip {
+    subnet_id = openstack_networking_subnet_v2.subnet_v6.id
+  }
+}
+
+resource "openstack_networking_port_v2" "port_v4" {
+  for_each           = setunion(var.master_node_names, var.worker_node_names)
+  name               = "${var.network_prefix}-port-v4"
+  network_id         = openstack_networking_network_v2.network_v4.id
+  security_group_ids = [openstack_networking_secgroup_v2.internal.id]
+  admin_state_up     = "true"
+
+  fixed_ip {
+    subnet_id = openstack_networking_subnet_v2.subnet_v4.id
+  }
+}
+
+resource "openstack_networking_port_v2" "port_v6" {
+  for_each           = setunion(var.master_node_names, var.worker_node_names)
+  name               = "${var.network_prefix}-port-v6"
+  network_id         = openstack_networking_network_v2.network_v6.id
+  security_group_ids = [openstack_networking_secgroup_v2.internal.id]
+  admin_state_up     = "true"
+
+  fixed_ip {
+    subnet_id = openstack_networking_subnet_v2.subnet_v6.id
+  }
 }
 
 # Subnet creation
-resource "openstack_networking_subnet_v2" "subnet_ip4" {
-  name            = "subnet_ip4"
-  network_id      = openstack_networking_network_v2.network_ip4.id
+resource "openstack_networking_subnet_v2" "subnet_v4" {
+  name            = "subnet_v4"
+  network_id      = openstack_networking_network_v2.network_v4.id
   cidr            = "192.168.42.0/24"
   dns_nameservers = ["8.8.8.8", "8.8.8.4"]
   ip_version      = 4
 }
 
-resource "openstack_networking_subnet_v2" "subnet_ip6" {
-  name              = "subnet_ip6"
-  network_id        = openstack_networking_network_v2.network_ip6.id
+resource "openstack_networking_subnet_v2" "subnet_v6" {
+  name              = "subnet_v6"
+  network_id        = openstack_networking_network_v2.network_v6.id
   cidr              = "2001:cafe::/64"
   ip_version        = 6
   ipv6_address_mode = "dhcpv6-stateful"
@@ -42,12 +86,12 @@ resource "openstack_networking_router_v2" "generic_v6" {
 # Router interface creation
 resource "openstack_networking_router_interface_v2" "router_interface_v4" {
   router_id = openstack_networking_router_v2.generic_v4.id
-  subnet_id = openstack_networking_subnet_v2.subnet_ip4.id
+  subnet_id = openstack_networking_subnet_v2.subnet_v4.id
 }
 
 resource "openstack_networking_router_interface_v2" "router_interface_v6" {
   router_id = openstack_networking_router_v2.generic_v6.id
-  subnet_id = openstack_networking_subnet_v2.subnet_ip6.id
+  subnet_id = openstack_networking_subnet_v2.subnet_v6.id
 }
 
 # securitygroup & rules creation
@@ -136,9 +180,9 @@ resource "openstack_compute_floatingip_v2" "fip" {
   pool = "floating-net"
 }
 
-resource "openstack_compute_floatingip_associate_v2" "fip_associate" {
+resource "openstack_networking_floatingip_associate_v2" "fip_associate" {
   floating_ip = openstack_compute_floatingip_v2.fip.address
-  instance_id = openstack_compute_instance_v2.ske_loadbalancer.id
+  port_id     = openstack_networking_port_v2.lb_port_v4.id
 }
 
 # data to get existing network id
