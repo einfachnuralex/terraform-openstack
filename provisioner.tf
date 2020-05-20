@@ -2,7 +2,7 @@ resource "null_resource" "lb_provisioner" {
   depends_on = [openstack_networking_floatingip_associate_v2.fip_associate]
   connection {
     type        = "ssh"
-    host        = openstack_compute_instance_v2.loadbalancer.floating_ip
+    host        = openstack_networking_floatingip_v2.fip.address
     user        = "ubuntu"
     private_key = file(var.private_key_path)
     timeout     = "5m"
@@ -32,7 +32,7 @@ resource "null_resource" "first_master" {
   depends_on = [null_resource.lb_provisioner]
   connection {
     type         = "ssh"
-    bastion_host = openstack_compute_instance_v2.loadbalancer.floating_ip
+    bastion_host = openstack_networking_floatingip_v2.fip.address
     host         = values(openstack_compute_instance_v2.master_nodes)[0].access_ip_v4
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
@@ -72,7 +72,7 @@ resource "null_resource" "master_join" {
   for_each   = var.master_node_names
   connection {
     type         = "ssh"
-    bastion_host = openstack_compute_instance_v2.loadbalancer.floating_ip
+    bastion_host = openstack_networking_floatingip_v2.fip.address
     host         = openstack_compute_instance_v2.master_nodes[each.key].access_ip_v4
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
@@ -93,7 +93,7 @@ resource "null_resource" "worker_join" {
   for_each   = var.worker_node_names
   connection {
     type         = "ssh"
-    bastion_host = oopenstack_compute_instance_v2.loadbalancer.floating_ip
+    bastion_host = openstack_networking_floatingip_v2.fip.address
     host         = openstack_compute_instance_v2.worker_nodes[each.key].access_ip_v4
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
