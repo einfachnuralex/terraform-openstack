@@ -28,6 +28,11 @@ ext_ports = {
     min      = 22
     max      = 22
     protocol = "tcp"
+  },
+  api = {
+    min      = 6443
+    max      = 6443
+    protocol = "tcp"
   }
 }
 
