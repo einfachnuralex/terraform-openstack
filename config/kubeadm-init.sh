@@ -4,7 +4,9 @@ do
     echo "waiting for dns entry..."
     sleep 5
 done
-sudo kubeadm init --config kubeadmconfig.yaml --upload-certs | tee result.log
+
+set -e
+sudo kubeadm init --config kubeadmconfig.yaml --upload-certs --v=5 | tee result.log
 grep -B2 \\--certificate-key result.log > master_join.sh
 tail -n 2 result.log > worker_join.sh
 
