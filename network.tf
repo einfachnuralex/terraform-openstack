@@ -189,12 +189,12 @@ resource "openstack_networking_secgroup_rule_v2" "int_v6" {
 }
 
 # floating-ip creation & associate
-resource "openstack_compute_floatingip_v2" "fip" {
+resource "openstack_networking_floatingip_v2" "fip" {
   pool = "floating-net"
 }
 
 resource "openstack_networking_floatingip_associate_v2" "fip_associate" {
-  floating_ip = openstack_compute_floatingip_v2.fip.address
+  floating_ip = openstack_networking_floatingip_v2.fip.address
   port_id     = openstack_networking_port_v2.lb_port_v4.id
 }
 
