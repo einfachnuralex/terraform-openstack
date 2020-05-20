@@ -56,6 +56,7 @@ resource "null_resource" "first_master" {
   }
 
   provisioner "remote-exec" {
+    on_failure = fail
     inline = [
       "echo 'ForwardAgent yes' >> ~/.ssh/config",
       "sudo mv /tmp/kubeadm.conf ~/kubeadmconfig.yaml",
