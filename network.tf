@@ -108,13 +108,13 @@ resource "openstack_networking_router_interface_v2" "router_interface_v6" {
 }
 
 # floating-ip creation & associate
-resource "openstack_compute_floatingip_v2" "fip" {
+resource "openstack_networking_floatingip_v2" "fip" {
   pool = "floating-net"
 }
 
 resource "openstack_networking_floatingip_associate_v2" "fip_associate" {
   depends_on  = [openstack_compute_instance_v2.loadbalancer]
-  floating_ip = openstack_compute_floatingip_v2.fip.address
+  floating_ip = openstack_networking_floatingip_v2.fip.address
   port_id     = openstack_networking_port_v2.lb_port_v4.id
 }
 
