@@ -1,7 +1,6 @@
 # Instance creation
 resource "openstack_compute_instance_v2" "loadbalancer" {
   name      = var.lb_name
-  image_id  = var.image_id
   flavor_id = data.openstack_compute_flavor_v2.flavor.id
   key_pair  = var.key_pair_name
 
@@ -26,7 +25,6 @@ resource "openstack_compute_instance_v2" "loadbalancer" {
 resource "openstack_compute_instance_v2" "master_nodes" {
   for_each  = var.master_node_names
   name      = each.key
-  image_id  = var.image_id
   flavor_id = data.openstack_compute_flavor_v2.flavor.id
   key_pair  = var.key_pair_name
 
@@ -51,7 +49,6 @@ resource "openstack_compute_instance_v2" "master_nodes" {
 resource "openstack_compute_instance_v2" "worker_nodes" {
   for_each  = var.worker_node_names
   name      = each.key
-  image_id  = var.image_id
   flavor_id = data.openstack_compute_flavor_v2.flavor.id
   key_pair  = var.key_pair_name
 
