@@ -71,5 +71,10 @@ int_ports = {
     min      = 30000
     max      = 32767
     protocol = "tcp"
+  },
+  ip_in_ip = {
+    min      = 0
+    max      = 0
+    protocol = "4"
   }
 }
