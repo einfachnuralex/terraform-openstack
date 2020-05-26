@@ -22,7 +22,7 @@ flavor_name = "c1.2"
 ## network ##
 network_prefix             = "network"
 secgroup_prefix            = "secgroup"
-allowed_address_pairs_cidr = "192.168.40.0/24"
+// allowed_address_pairs_cidr = ""
 ext_ports = {
   ssh = {
     min      = 22
