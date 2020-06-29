@@ -9,52 +9,6 @@ resource "openstack_networking_network_v2" "network_v6" {
   admin_state_up = "true"
 }
 
-# Port creation
-resource "openstack_networking_port_v2" "lb_port_v4" {
-  name               = "${var.network_prefix}-lb-port-v4"
-  network_id         = openstack_networking_network_v2.network_v4.id
-  security_group_ids = [openstack_networking_secgroup_v2.external.id]
-  admin_state_up     = "true"
-
-  fixed_ip {
-    subnet_id = openstack_networking_subnet_v2.subnet_v4.id
-  }
-}
-
-resource "openstack_networking_port_v2" "lb_port_v6" {
-  name           = "${var.network_prefix}-lb-port-v6"
-  network_id     = openstack_networking_network_v2.network_v6.id
-  admin_state_up = "true"
-
-  fixed_ip {
-    subnet_id = openstack_networking_subnet_v2.subnet_v6.id
-  }
-}
-
-resource "openstack_networking_port_v2" "port_v4" {
-  for_each           = setunion(var.master_node_names, var.worker_node_names)
-  name               = "${var.network_prefix}-port-v4"
-  network_id         = openstack_networking_network_v2.network_v4.id
-  security_group_ids = [openstack_networking_secgroup_v2.internal.id]
-  admin_state_up     = "true"
-
-  fixed_ip {
-    subnet_id = openstack_networking_subnet_v2.subnet_v4.id
-  }
-}
-
-resource "openstack_networking_port_v2" "port_v6" {
-  for_each           = setunion(var.master_node_names, var.worker_node_names)
-  name               = "${var.network_prefix}-port-v6"
-  network_id         = openstack_networking_network_v2.network_v6.id
-  security_group_ids = [openstack_networking_secgroup_v2.internal.id]
-  admin_state_up     = "true"
-
-  fixed_ip {
-    subnet_id = openstack_networking_subnet_v2.subnet_v6.id
-  }
-}
-
 # Subnet creation
 resource "openstack_networking_subnet_v2" "subnet_v4" {
   name            = "subnet_v4"
@@ -71,6 +25,65 @@ resource "openstack_networking_subnet_v2" "subnet_v6" {
   ip_version        = 6
   ipv6_address_mode = "dhcpv6-stateful"
   ipv6_ra_mode      = "dhcpv6-stateful"
+}
+
+# Port creation
+resource "openstack_networking_port_v2" "lb_port_v4" {
+  name               = "${var.network_prefix}-lb-port-v4"
+  network_id         = openstack_networking_network_v2.network_v4.id
+  security_group_ids = [openstack_networking_secgroup_v2.external.id]
+  admin_state_up     = "true"
+
+  fixed_ip {
+    subnet_id = openstack_networking_subnet_v2.subnet_v4.id
+  }
+}
+
+resource "openstack_networking_port_v2" "lb_port_v6" {
+  name               = "${var.network_prefix}-lb-port-v6"
+  network_id         = openstack_networking_network_v2.network_v6.id
+  security_group_ids = [openstack_networking_secgroup_v2.external.id]
+  admin_state_up     = "true"
+
+  fixed_ip {
+    subnet_id = openstack_networking_subnet_v2.subnet_v6.id
+  }
+
+  allowed_address_pairs {
+    ip_address = var.allowed_address_pairs_cidr
+  }
+}
+
+resource "openstack_networking_port_v2" "port_v4" {
+  for_each           = setunion(var.master_node_names, var.worker_node_names)
+  name               = "${var.network_prefix}-port-v4"
+  network_id         = openstack_networking_network_v2.network_v4.id
+  security_group_ids = [openstack_networking_secgroup_v2.internal.id]
+  admin_state_up     = "true"
+
+  fixed_ip {
+    subnet_id = openstack_networking_subnet_v2.subnet_v4.id
+  }
+
+  allowed_address_pairs {
+    ip_address = var.allowed_address_pairs_cidr
+  }
+}
+
+resource "openstack_networking_port_v2" "port_v6" {
+  for_each           = setunion(var.master_node_names, var.worker_node_names)
+  name               = "${var.network_prefix}-port-v6"
+  network_id         = openstack_networking_network_v2.network_v6.id
+  security_group_ids = [openstack_networking_secgroup_v2.internal.id]
+  admin_state_up     = "true"
+
+  fixed_ip {
+    subnet_id = openstack_networking_subnet_v2.subnet_v6.id
+  }
+
+  allowed_address_pairs {
+    ip_address = var.allowed_address_pairs_cidr
+  }
 }
 
 # Router creation
@@ -92,6 +105,17 @@ resource "openstack_networking_router_interface_v2" "router_interface_v4" {
 resource "openstack_networking_router_interface_v2" "router_interface_v6" {
   router_id = openstack_networking_router_v2.generic_v6.id
   subnet_id = openstack_networking_subnet_v2.subnet_v6.id
+}
+
+# floating-ip creation & associate
+resource "openstack_networking_floatingip_v2" "fip" {
+  pool = "floating-net"
+}
+
+resource "openstack_networking_floatingip_associate_v2" "fip_associate" {
+  depends_on  = [openstack_compute_instance_v2.loadbalancer]
+  floating_ip = openstack_networking_floatingip_v2.fip.address
+  port_id     = openstack_networking_port_v2.lb_port_v4.id
 }
 
 # securitygroup & rules creation
@@ -173,16 +197,6 @@ resource "openstack_networking_secgroup_rule_v2" "int_v6" {
   port_range_max    = each.value.max
   remote_group_id   = openstack_networking_secgroup_v2.internal.id
   security_group_id = openstack_networking_secgroup_v2.internal.id
-}
-
-# floating-ip creation & associate
-resource "openstack_compute_floatingip_v2" "fip" {
-  pool = "floating-net"
-}
-
-resource "openstack_networking_floatingip_associate_v2" "fip_associate" {
-  floating_ip = openstack_compute_floatingip_v2.fip.address
-  port_id     = openstack_networking_port_v2.lb_port_v4.id
 }
 
 # data to get existing network id

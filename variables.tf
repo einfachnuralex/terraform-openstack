@@ -1,3 +1,8 @@
+## k8s ##
+variable "control_plane_endpoint" {
+  type = string
+}
+
 ## instance ##
 variable "master_node_names" {
   type = set(string)
@@ -10,7 +15,6 @@ variable "worker_node_names" {
 variable "lb_name" {
   type = string
 }
-
 variable "image_id" {
   type = string
 }
@@ -35,6 +39,10 @@ variable "network_prefix" {
 }
 
 variable "secgroup_prefix" {
+  type = string
+}
+
+variable allowed_address_pairs_cidr {
   type = string
 }
 
