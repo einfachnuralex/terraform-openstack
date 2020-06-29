@@ -15,7 +15,7 @@ Automated Provisioning of:
 - kubeadm init on first_master
 - kubeadm join on masters / workers
 
-Suppoted OS: Ubuntu
+Suppoted OS: Ubuntu   
 Supported Kubernetes Version: 18.02
 
 ## Prerequisite
