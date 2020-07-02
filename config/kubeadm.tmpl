@@ -1,21 +1,19 @@
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+nodeRegistration:
+  kubeletExtraArgs:
+    cloud-provider: "external"
+---
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: ClusterConfiguration
 kubernetesVersion: v1.18.2
 controlPlaneEndpoint: ${control_plane_endpoint}:6443
 networking:
-  serviceSubnet: "172.16.0.0/16,fd02::/112"
-  podSubnet: "172.18.0.0/16,fd02::100:0/112"
-  dnsDomain: "cluster.local"
-featureGates:
-  IPv6DualStack: true
----
-apiVersion: kubeproxy.config.k8s.io/v1alpha1
-kind: KubeProxyConfiguration
-mode: ipvs
-featureGates:
-  IPv6DualStack: true
----
-apiVersion: kubelet.config.k8s.io/v1beta1
-kind: KubeletConfiguration
-featureGates:
-  IPv6DualStack: true
+  podSubnet: "192.168.0.0/16"
+apiServer:
+  extraArgs:
+    cloud-provider: "external"
+controllerManager:
+  extraArgs:
+    cloud-provider: "external"
