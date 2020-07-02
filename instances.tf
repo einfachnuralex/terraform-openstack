@@ -17,9 +17,9 @@ resource "openstack_compute_instance_v2" "loadbalancer" {
     port = openstack_networking_port_v2.lb_port_v4.id
   }
 
-  network {
+  /* network {
     port = openstack_networking_port_v2.lb_port_v6.id
-  }
+  } */
 }
 
 resource "openstack_compute_instance_v2" "master_nodes" {
@@ -41,9 +41,9 @@ resource "openstack_compute_instance_v2" "master_nodes" {
     port = openstack_networking_port_v2.port_v4[each.key].id
   }
 
-  network {
+  /* network {
     port = openstack_networking_port_v2.port_v6[each.key].id
-  }
+  } */
 }
 
 resource "openstack_compute_instance_v2" "worker_nodes" {
@@ -65,9 +65,9 @@ resource "openstack_compute_instance_v2" "worker_nodes" {
     port = openstack_networking_port_v2.port_v4[each.key].id
   }
 
-  network {
+  /* network {
     port = openstack_networking_port_v2.port_v6[each.key].id
-  }
+  } */
 }
 
 # data to get existing flavor id

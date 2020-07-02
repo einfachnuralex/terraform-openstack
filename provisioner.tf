@@ -10,7 +10,7 @@ resource "null_resource" "lb_provisioner" {
 
   provisioner "file" {
     content = templatefile("config/nginx.tmpl", {
-      ip_addrs = [for instance in openstack_compute_instance_v2.master_nodes : instance.access_ip_v6],
+      ip_addrs = [for instance in openstack_compute_instance_v2.master_nodes : instance.access_ip_v4],
       port     = 6443
     })
     destination = "/tmp/nginx.conf"
