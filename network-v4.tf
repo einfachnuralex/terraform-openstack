@@ -13,18 +13,6 @@ resource "openstack_networking_subnet_v2" "subnet_v4" {
   ip_version      = 4
 }
 
-# Port creation
-resource "openstack_networking_port_v2" "lb_port_v4" {
-  name               = "${var.network_prefix}-lb-port-v4"
-  network_id         = openstack_networking_network_v2.network_v4.id
-  security_group_ids = [openstack_networking_secgroup_v2.external.id]
-  admin_state_up     = "true"
-
-  fixed_ip {
-    subnet_id = openstack_networking_subnet_v2.subnet_v4.id
-  }
-}
-
 resource "openstack_networking_port_v2" "port_v4" {
   for_each           = setunion(var.master_node_names, var.worker_node_names)
   name               = "${var.network_prefix}-port-v4"

@@ -1,8 +1,8 @@
 resource "null_resource" "lb_provisioner" {
-  depends_on = [openstack_lb_loadbalancer_v2.tcp]
+  depends_on = [openstack_lb_loadbalancer_v2.elastic_lb]
   connection {
     type        = "ssh"
-    host        = openstack_lb_loadbalancer_v2.tcp.vip_address
+    host        = openstack_lb_loadbalancer_v2.elastic_lb.vip_address
     user        = "ubuntu"
     private_key = file(var.private_key_path)
     timeout     = "5m"
@@ -32,7 +32,7 @@ resource "null_resource" "first_master" {
   depends_on = [null_resource.lb_provisioner]
   connection {
     type         = "ssh"
-    bastion_host = openstack_lb_loadbalancer_v2.tcp.vip_address
+    bastion_host = openstack_lb_loadbalancer_v2.elastic_lb.vip_address
     host         = values(openstack_compute_instance_v2.master_nodes)[0].access_ip_v4
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
@@ -73,7 +73,7 @@ resource "null_resource" "master_join" {
   for_each   = var.master_node_names
   connection {
     type         = "ssh"
-    bastion_host = openstack_lb_loadbalancer_v2.tcp.vip_address
+    bastion_host = openstack_lb_loadbalancer_v2.elastic_lb.vip_address
     host         = openstack_compute_instance_v2.master_nodes[each.key].access_ip_v4
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
@@ -94,7 +94,7 @@ resource "null_resource" "worker_join" {
   for_each   = var.worker_node_names
   connection {
     type         = "ssh"
-    bastion_host = openstack_lb_loadbalancer_v2.tcp.vip_address
+    bastion_host = openstack_lb_loadbalancer_v2.elastic_lb.vip_address
     host         = openstack_compute_instance_v2.worker_nodes[each.key].access_ip_v4
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
