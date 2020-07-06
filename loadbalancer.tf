@@ -40,7 +40,7 @@ resource "openstack_lb_monitor_v2" "monitor_1" {
 }
 
 # Associate floating-ip to the lb port
-resource "openstack_compute_floatingip_v2" "fip" {
+resource "openstack_networking_floatingip_v2" "fip" {
   pool = "floating-net"
   port_id = openstack_lb_loadbalancer_v2.elastic_lb.vip_port_id
 }

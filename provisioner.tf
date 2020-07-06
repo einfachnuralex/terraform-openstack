@@ -1,35 +1,5 @@
-resource "null_resource" "lb_provisioner" {
-  depends_on = [openstack_lb_loadbalancer_v2.elastic_lb]
-  connection {
-    type        = "ssh"
-    host        = openstack_lb_loadbalancer_v2.elastic_lb.vip_address
-    user        = "ubuntu"
-    private_key = file(var.private_key_path)
-    timeout     = "5m"
-  }
-
-  provisioner "file" {
-    content = templatefile("config/nginx.tmpl", {
-      ip_addrs = [for instance in openstack_compute_instance_v2.master_nodes : instance.access_ip_v4],
-      port     = 6443
-    })
-    destination = "/tmp/nginx.conf"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "sudo apt-get install -y nginx",
-      "sudo apt-get install -y nginx libnginx-mod-stream",
-      "sudo mv /tmp/nginx.conf /etc/nginx/nginx.conf",
-      "sudo systemctl restart nginx",
-      "echo 'ForwardAgent yes' >> ~/.ssh/config",
-      "sleep 1",
-    ]
-  }
-}
-
 resource "null_resource" "first_master" {
-  depends_on = [null_resource.lb_provisioner]
+  depends_on = [openstack_lb_loadbalancer_v2.elastic_lb]
   connection {
     type         = "ssh"
     bastion_host = openstack_lb_loadbalancer_v2.elastic_lb.vip_address
