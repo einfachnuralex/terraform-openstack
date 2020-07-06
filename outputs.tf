@@ -13,3 +13,7 @@ output "worker_info" {
     [for instance in openstack_compute_instance_v2.worker_nodes : instance.access_ip_v6],
   )
 }
+
+output "loadbalancer_public_ip" {
+  value = openstack_compute_floatingip_v2.fip.address
+}
