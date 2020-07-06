@@ -53,17 +53,6 @@ resource "openstack_networking_router_interface_v2" "router_interface_v4" {
   subnet_id = openstack_networking_subnet_v2.subnet_v4.id
 }
 
-# floating-ip creation & associate
-resource "openstack_networking_floatingip_v2" "fip" {
-  pool = "floating-net"
-}
-
-resource "openstack_networking_floatingip_associate_v2" "fip_associate" {
-  depends_on  = [openstack_compute_instance_v2.loadbalancer]
-  floating_ip = openstack_networking_floatingip_v2.fip.address
-  port_id     = openstack_networking_port_v2.lb_port_v4.id
-}
-
 # securitygroup & rules creation
 resource "openstack_networking_secgroup_v2" "external" {
   name = "${var.secgroup_prefix}-ext"

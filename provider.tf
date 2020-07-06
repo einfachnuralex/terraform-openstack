@@ -1,5 +1,7 @@
 # provider (source openrc)
-provider "openstack" {}
+provider "openstack" {
+  use_octavia = true
+}
 
 provider "google" {
   credentials = "auth/gcp-dns-auth.json"
