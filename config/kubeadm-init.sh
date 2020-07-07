@@ -1,23 +1,31 @@
 #!/bin/bash
-while [[ -z $(dig +short AAAA ${control_plane_endpoint}) ]]
-do
-    echo "waiting for dns entry..."
-    sleep 5
+while [ "$(dig +short A cp6.gardener.ganter.dev)" != ${fip_address} ]; do
+  echo "waiting for dns entry..."
+  echo "shoud match ${fip_address}"
+  echo "but is" $(dig +short A cp6.gardener.ganter.dev)
+  sleep 5
 done
 
 set -e
-sudo kubeadm init --config kubeadmconfig.yaml --v=5 | tee result.log
-sudo kubeadm --print-join-command > worker_join.sh
-(cat worker_join.sh ; echo '--control-plane')
+# kubeadm init first master
+sudo kubeadm init --config kubeadmconfig.yaml --v=3
 
+# get worker join
+sudo kubeadm token create --print-join-command >worker_join.sh
+
+# get master join
+certKey=$(sudo kubeadm init phase upload-certs --upload-certs 2>0 | tail -n 1)
+sudo kubeadm token create --print-join-command --certificate-key $certKey >master_join.sh
+
+# copy join to master / worker
 %{ for master_ip in master_ips ~}
-ssh-keyscan -H ${master_ip} >> ~/.ssh/known_hosts
+ssh-keyscan -H ${master_ip} >>~/.ssh/known_hosts
 scp master_join.sh ${master_ip}:
 
 %{ endfor ~}
 
 %{ for worker_ip in worker_ips ~}
-ssh-keyscan -H ${worker_ip} >> ~/.ssh/known_hosts
+ssh-keyscan -H ${worker_ip} >>~/.ssh/known_hosts
 scp worker_join.sh ${worker_ip}:
 
 %{ endfor ~}
