@@ -1,49 +1,59 @@
-resource "null_resource" "first_master" {
-  depends_on = [openstack_lb_loadbalancer_v2.elastic_lb]
+resource "null_resource" "bootstrap_cluster" {
+  depends_on = [openstack_lb_member_v2.member_ssh, openstack_compute_instance_v2.master_nodes]
+  triggers   = {
+    master = join(", ", [for instance in openstack_compute_instance_v2.master_nodes : instance.id]),
+    worker = join(", ", [for instance in openstack_compute_instance_v2.worker_nodes : instance.id]),
+  }
   connection {
-    type         = "ssh"
-    bastion_host = openstack_lb_loadbalancer_v2.elastic_lb.vip_address
-    host         = values(openstack_compute_instance_v2.master_nodes)[0].access_ip_v4
-    user         = "ubuntu"
-    private_key  = file(var.private_key_path)
-    timeout      = "5m"
+    type        = "ssh"
+    port        = 2222
+    host        = openstack_networking_floatingip_v2.fip.address
+    user        = "ubuntu"
+    private_key = file(var.private_key_path)
+    timeout     = "5m"
   }
 
   provisioner "file" {
-    content = templatefile("config/kubeadm.tmpl", {
+    content     = templatefile("config/kubeadm.tmpl", {
       control_plane_endpoint = var.control_plane_endpoint
     })
     destination = "/tmp/kubeadm.conf"
   }
 
   provisioner "file" {
-    content = templatefile("config/kubeadm-init.sh", {
+    content     = templatefile("config/kubeadm-init.sh", {
       master_ips             = [for instance in openstack_compute_instance_v2.master_nodes : instance.access_ip_v4]
       worker_ips             = [for instance in openstack_compute_instance_v2.worker_nodes : instance.access_ip_v4]
+      fip_address            = openstack_networking_floatingip_v2.fip.address
       control_plane_endpoint = var.control_plane_endpoint
     })
     destination = "/tmp/kubeadm-init.sh"
   }
 
   provisioner "remote-exec" {
-    on_failure = fail
     inline = [
       "echo 'ForwardAgent yes' >> ~/.ssh/config",
       "sudo mv /tmp/kubeadm.conf ~/kubeadmconfig.yaml",
       "sudo mv /tmp/kubeadm-init.sh ~/kubeadm-init.sh",
       "sudo chmod +x kubeadm-init.sh",
       "./kubeadm-init.sh",
+      "sudo cp /etc/kubernetes/admin.conf . && sudo chown ubuntu admin.conf",
       "sleep 1",
     ]
   }
 }
 
+
 resource "null_resource" "master_join" {
-  depends_on = [null_resource.first_master]
-  for_each   = var.master_node_names
+  depends_on = [null_resource.bootstrap_cluster]
+  triggers   = {
+    master = join(", ", [for instance in openstack_compute_instance_v2.master_nodes : instance.id])
+  }
+  for_each   = toset(slice(tolist(var.master_node_names), 1, length(var.master_node_names)))
   connection {
     type         = "ssh"
-    bastion_host = openstack_lb_loadbalancer_v2.elastic_lb.vip_address
+    bastion_host = openstack_networking_floatingip_v2.fip.address
+    bastion_port = 2222
     host         = openstack_compute_instance_v2.master_nodes[each.key].access_ip_v4
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
@@ -60,11 +70,15 @@ resource "null_resource" "master_join" {
 }
 
 resource "null_resource" "worker_join" {
-  depends_on = [null_resource.master_join]
+  depends_on = [null_resource.bootstrap_cluster]
+  triggers   = {
+    worker = join(", ", [for instance in openstack_compute_instance_v2.worker_nodes : instance.id])
+  }
   for_each   = var.worker_node_names
   connection {
     type         = "ssh"
-    bastion_host = openstack_lb_loadbalancer_v2.elastic_lb.vip_address
+    bastion_host = openstack_networking_floatingip_v2.fip.address
+    bastion_port = 2222
     host         = openstack_compute_instance_v2.worker_nodes[each.key].access_ip_v4
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
@@ -79,4 +93,3 @@ resource "null_resource" "worker_join" {
     ]
   }
 }
-

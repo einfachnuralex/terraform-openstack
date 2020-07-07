@@ -16,12 +16,12 @@ echo "#### Bootstrapp finished or skipped ####"
 
 # get worker join
 echo "create worker join"
-sudo kubeadm token create --print-join-command >worker_join.sh
+sudo kubeadm token create --print-join-command >worker_join.sh 2>/dev/null
 
 # get master join
 echo "create master join"
-certKey=$(sudo kubeadm init phase upload-certs --upload-certs | tail -n 1)
-sudo kubeadm token create --print-join-command --certificate-key $certKey >master_join.sh
+certKey=$(sudo kubeadm init phase upload-certs --upload-certs 2>/dev/null | tail -n 1)
+sudo kubeadm token create --print-join-command --certificate-key $certKey >master_join.sh 2>/dev/null
 
 # copy join to master / worker
 %{ for master_ip in master_ips ~}
