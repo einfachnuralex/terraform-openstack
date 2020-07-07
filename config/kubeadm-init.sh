@@ -1,8 +1,8 @@
 #!/bin/bash
-while [ "$(dig +short A cp6.gardener.ganter.dev)" != ${fip_address} ]; do
+while [ "$(dig +short A ${control_plane_endpoint})" != ${fip_address} ]; do
   echo "waiting for dns entry..."
   echo "shoud match ${fip_address}"
-  echo "but is" $(dig +short A cp6.gardener.ganter.dev)
+  echo "but is" $(dig +short A ${control_plane_endpoint})
   sleep 5
 done
 

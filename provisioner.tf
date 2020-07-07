@@ -10,7 +10,6 @@ resource "null_resource" "bootstrap_cluster" {
     host        = openstack_networking_floatingip_v2.fip.address
     user        = "ubuntu"
     private_key = file(var.private_key_path)
-    timeout     = "5m"
   }
 
   provisioner "file" {
@@ -37,7 +36,30 @@ resource "null_resource" "bootstrap_cluster" {
       "sudo mv /tmp/kubeadm-init.sh ~/kubeadm-init.sh",
       "sudo chmod +x kubeadm-init.sh",
       "./kubeadm-init.sh",
-      "sudo cp /etc/kubernetes/admin.conf . && sudo chown ubuntu admin.conf",
+      "mkdir .kube && sudo cp /etc/kubernetes/admin.conf ~/.kube/config",
+      "sudo chown ubuntu ~/.kube/config",
+      "sleep 1",
+    ]
+  }
+}
+
+resource "null_resource" "install_calico" {
+  depends_on = [null_resource.bootstrap_cluster]
+  triggers   = {
+    first_master = values(openstack_compute_instance_v2.master_nodes)[0].id,
+    lol          = "lol"
+  }
+  connection {
+    type        = "ssh"
+    port        = 2222
+    host        = openstack_networking_floatingip_v2.fip.address
+    user        = "ubuntu"
+    private_key = file(var.private_key_path)
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml",
       "sleep 1",
     ]
   }
@@ -57,7 +79,6 @@ resource "null_resource" "master_join" {
     host         = openstack_compute_instance_v2.master_nodes[each.key].access_ip_v4
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
-    timeout      = "5m"
   }
 
   provisioner "remote-exec" {
@@ -82,7 +103,6 @@ resource "null_resource" "worker_join" {
     host         = openstack_compute_instance_v2.worker_nodes[each.key].access_ip_v4
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
-    timeout      = "5m"
   }
 
   provisioner "remote-exec" {
