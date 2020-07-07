@@ -4,7 +4,7 @@ resource "google_dns_record_set" "loadbalancer" {
   ttl  = 300
 
   managed_zone = data.google_dns_managed_zone.dns_zone.name
-  rrdatas      = [openstack_lb_loadbalancer_v2.elastic_lb.vip_address]
+  rrdatas      = [openstack_networking_floatingip_v2.fip.address]
 }
 
 data "google_dns_managed_zone" "dns_zone" {

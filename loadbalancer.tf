@@ -14,10 +14,9 @@ resource "openstack_lb_listener_v2" "listener_k8s" {
 
 # Create ssh listener for first_master
 resource "openstack_lb_listener_v2" "listener_ssh" {
-  lol             = "wdw"
   name            = "listener_ssh"
   protocol        = "TCP"
-  protocol_port   = 22
+  protocol_port   = 2222
   loadbalancer_id = openstack_lb_loadbalancer_v2.elastic_lb.id
 }
 

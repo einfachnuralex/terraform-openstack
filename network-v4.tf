@@ -41,16 +41,11 @@ resource "openstack_networking_router_interface_v2" "router_interface_v4" {
   subnet_id = openstack_networking_subnet_v2.subnet_v4.id
 }
 
-# securitygroup & rules creation
-resource "openstack_networking_secgroup_v2" "external" {
-  name = "${var.secgroup_prefix}-ext"
-}
-
 resource "openstack_networking_secgroup_v2" "internal" {
   name = "${var.secgroup_prefix}-int"
 }
 
-resource "openstack_networking_secgroup_rule_v2" "ext_v4_rules" {
+resource "openstack_networking_secgroup_rule_v2" "ext_2_int" {
   for_each          = var.ext_ports
   description       = each.key
   direction         = "ingress"
@@ -59,22 +54,10 @@ resource "openstack_networking_secgroup_rule_v2" "ext_v4_rules" {
   port_range_min    = each.value.min
   port_range_max    = each.value.max
   remote_ip_prefix  = "0.0.0.0/0"
-  security_group_id = openstack_networking_secgroup_v2.external.id
-}
-
-resource "openstack_networking_secgroup_rule_v2" "ext_to_int_v4" {
-  for_each          = var.ext_ports
-  description       = each.key
-  direction         = "ingress"
-  ethertype         = "IPv4"
-  protocol          = each.value.protocol
-  port_range_min    = each.value.min
-  port_range_max    = each.value.max
-  remote_group_id   = openstack_networking_secgroup_v2.external.id
   security_group_id = openstack_networking_secgroup_v2.internal.id
 }
 
-resource "openstack_networking_secgroup_rule_v2" "int_v4" {
+resource "openstack_networking_secgroup_rule_v2" "int_2_int" {
   for_each          = var.int_ports
   description       = each.key
   direction         = "ingress"
