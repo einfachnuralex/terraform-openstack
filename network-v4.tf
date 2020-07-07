@@ -9,7 +9,7 @@ resource "openstack_networking_subnet_v2" "subnet_v4" {
   name            = "subnet_v4"
   network_id      = openstack_networking_network_v2.network_v4.id
   cidr            = "192.168.42.0/24"
-  dns_nameservers = ["8.8.8.8", "8.8.8.4"]
+  dns_nameservers = ["8.8.8.8", "8.8.4.4"]
   ip_version      = 4
 }
 
