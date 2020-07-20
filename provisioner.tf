@@ -45,27 +45,26 @@ resource "null_resource" "bootstrap_cluster" {
 }
 
 
-//resource "null_resource" "install_calico" {
-//  depends_on = [null_resource.bootstrap_cluster]
-//  triggers   = {
-//    first_master = values(openstack_compute_instance_v2.master_nodes)[0].id,
-//    lol          = "lol"
-//  }
-//  connection {
-//    type        = "ssh"
-//    port        = 2222
-//    host        = openstack_networking_floatingip_v2.fip.address
-//    user        = "ubuntu"
-//    private_key = file(var.private_key_path)
-//  }
-//
-//  provisioner "remote-exec" {
-//    inline = [
-//      "sudo kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml",
-//      "sleep 1",
-//    ]
-//  }
-//}
+resource "null_resource" "install_calico" {
+  depends_on = [null_resource.bootstrap_cluster]
+  triggers = {
+    first_master = values(openstack_compute_instance_v2.master_nodes)[0].id
+  }
+  connection {
+    type        = "ssh"
+    port        = 2222
+    host        = openstack_networking_floatingip_v2.fip.address
+    user        = "ubuntu"
+    private_key = file(var.private_key_path)
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml",
+      "sleep 1",
+    ]
+  }
+}
 
 resource "null_resource" "master_join" {
   depends_on = [null_resource.bootstrap_cluster]
