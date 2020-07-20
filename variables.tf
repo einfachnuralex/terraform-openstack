@@ -1,4 +1,8 @@
 ## k8s ##
+variable "cluster_name" {
+  type = string
+}
+
 variable "control_plane_endpoint" {
   type = string
 }

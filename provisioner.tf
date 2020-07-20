@@ -1,6 +1,6 @@
 resource "null_resource" "bootstrap_cluster" {
   depends_on = [openstack_lb_member_v2.member_ssh, openstack_compute_instance_v2.master_nodes]
-  triggers   = {
+  triggers = {
     master = join(", ", [for instance in openstack_compute_instance_v2.master_nodes : instance.id]),
     worker = join(", ", [for instance in openstack_compute_instance_v2.worker_nodes : instance.id]),
   }
@@ -13,14 +13,15 @@ resource "null_resource" "bootstrap_cluster" {
   }
 
   provisioner "file" {
-    content     = templatefile("config/kubeadm.tmpl", {
+    content = templatefile("config/kubeadm.tmpl", {
       control_plane_endpoint = var.control_plane_endpoint
+      cluster_name           = var.cluster_name
     })
     destination = "/tmp/kubeadm.conf"
   }
 
   provisioner "file" {
-    content     = templatefile("config/kubeadm-init.sh", {
+    content = templatefile("config/kubeadm-init.sh", {
       master_ips             = [for instance in openstack_compute_instance_v2.master_nodes : instance.access_ip_v4]
       worker_ips             = [for instance in openstack_compute_instance_v2.worker_nodes : instance.access_ip_v4]
       fip_address            = openstack_networking_floatingip_v2.fip.address
@@ -43,35 +44,35 @@ resource "null_resource" "bootstrap_cluster" {
   }
 }
 
-resource "null_resource" "install_calico" {
-  depends_on = [null_resource.bootstrap_cluster]
-  triggers   = {
-    first_master = values(openstack_compute_instance_v2.master_nodes)[0].id,
-    lol          = "lol"
-  }
-  connection {
-    type        = "ssh"
-    port        = 2222
-    host        = openstack_networking_floatingip_v2.fip.address
-    user        = "ubuntu"
-    private_key = file(var.private_key_path)
-  }
 
-  provisioner "remote-exec" {
-    inline = [
-      "sudo kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml",
-      "sleep 1",
-    ]
-  }
-}
-
+//resource "null_resource" "install_calico" {
+//  depends_on = [null_resource.bootstrap_cluster]
+//  triggers   = {
+//    first_master = values(openstack_compute_instance_v2.master_nodes)[0].id,
+//    lol          = "lol"
+//  }
+//  connection {
+//    type        = "ssh"
+//    port        = 2222
+//    host        = openstack_networking_floatingip_v2.fip.address
+//    user        = "ubuntu"
+//    private_key = file(var.private_key_path)
+//  }
+//
+//  provisioner "remote-exec" {
+//    inline = [
+//      "sudo kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml",
+//      "sleep 1",
+//    ]
+//  }
+//}
 
 resource "null_resource" "master_join" {
   depends_on = [null_resource.bootstrap_cluster]
-  triggers   = {
+  triggers = {
     master = join(", ", [for instance in openstack_compute_instance_v2.master_nodes : instance.id])
   }
-  for_each   = toset(slice(tolist(var.master_node_names), 1, length(var.master_node_names)))
+  for_each = toset(slice(tolist(var.master_node_names), 1, length(var.master_node_names)))
   connection {
     type         = "ssh"
     bastion_host = openstack_networking_floatingip_v2.fip.address
@@ -92,10 +93,10 @@ resource "null_resource" "master_join" {
 
 resource "null_resource" "worker_join" {
   depends_on = [null_resource.bootstrap_cluster]
-  triggers   = {
+  triggers = {
     worker = join(", ", [for instance in openstack_compute_instance_v2.worker_nodes : instance.id])
   }
-  for_each   = var.worker_node_names
+  for_each = var.worker_node_names
   connection {
     type         = "ssh"
     bastion_host = openstack_networking_floatingip_v2.fip.address
