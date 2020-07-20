@@ -16,9 +16,6 @@ variable "worker_node_names" {
   type = set(string)
 }
 
-variable "lb_name" {
-  type = string
-}
 variable "image_id" {
   type = string
 }
