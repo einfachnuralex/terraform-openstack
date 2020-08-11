@@ -121,7 +121,7 @@ resource "null_resource" "get_kube_cred" {
   depends_on = [null_resource.bootstrap_cluster]
 
   provisioner "local-exec" {
-    command = "scp -o \"StrictHostKeyChecking=no\" -i $DO_KEY -P $DO_PORT $DO_USER@$DO_HOST:~/.kube/config output/kubeconfig"
+    command = "mkdir output && scp -o \"StrictHostKeyChecking=no\" -i $DO_KEY -P $DO_PORT $DO_USER@$DO_HOST:~/.kube/config output/kubeconfig"
 
     environment = {
       DO_PORT = 2222
