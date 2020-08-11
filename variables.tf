@@ -28,6 +28,10 @@ variable "node_cidr" {
   type = string
 }
 
+variable "srv_cidr" {
+  type = string
+}
+
 variable "flavor_name" {
   type = string
 }

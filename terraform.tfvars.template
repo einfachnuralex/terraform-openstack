@@ -20,11 +20,12 @@ key_pair_name    = "ske-key"
 private_key_path = "auth/ske-key"
 pod_cidr = "10.244.0.0/16"
 node_cidr = "192.168.42.0/24"
+srv_cidr = "10.96.0.0/12"
 
 # Google DNS Zone settings
 
 //dns_zone_name        = ""
-dns_zone_credentials = "auth/ske-dns-admin.json"
+//dns_zone_credentials = "auth/ske-dns-admin.json"
 //dns_zone_project     = ""
 dns_zone_region      = "eu-central1"
 

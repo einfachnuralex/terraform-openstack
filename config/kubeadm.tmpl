@@ -18,6 +18,7 @@ clusterName: ${cluster_name}
 controlPlaneEndpoint: ${control_plane_endpoint}:6443
 networking:
   podSubnet: "${pod_cidr}"
+  serviceSubnet: "${srv_cidr}"  
 apiServer:
   certSANs:
   - ${control_plane_endpoint}

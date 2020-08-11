@@ -18,6 +18,7 @@ resource "null_resource" "bootstrap_cluster" {
       cluster_name           = var.cluster_name
       fip_address            = openstack_networking_floatingip_v2.fip.address
       pod_cidr               = var.pod_cidr
+      srv_cidr               = var.srv_cidr
     })
     destination = "/tmp/kubeadm.conf"
   }
