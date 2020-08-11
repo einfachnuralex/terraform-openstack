@@ -36,6 +36,11 @@ ext_ports = {
     max      = 22
     protocol = "tcp"
   },
+  node_port_tcp = {
+    min      = 30000
+    max      = 32767
+    protocol = "tcp"
+  },  
   api = {
     min      = 6443
     max      = 6443
