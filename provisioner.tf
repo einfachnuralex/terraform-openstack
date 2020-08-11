@@ -16,6 +16,8 @@ resource "null_resource" "bootstrap_cluster" {
     content = templatefile("config/kubeadm.tmpl", {
       control_plane_endpoint = var.control_plane_endpoint
       cluster_name           = var.cluster_name
+      fip_address            = openstack_networking_floatingip_v2.fip.address
+      pod_cidr               = var.pod_cidr
     })
     destination = "/tmp/kubeadm.conf"
   }
@@ -44,28 +46,27 @@ resource "null_resource" "bootstrap_cluster" {
   }
 }
 
+resource "null_resource" "install_calico" {
+  depends_on = [null_resource.bootstrap_cluster]
+  triggers   = {
+    first_master = values(openstack_compute_instance_v2.master_nodes)[0].id
+  }
+  connection {
+    type        = "ssh"
+    port        = 2222
+    host        = openstack_networking_floatingip_v2.fip.address
+    user        = "ubuntu"
+    private_key = file(var.private_key_path)
+  }
 
-//resource "null_resource" "install_calico" {
-//  depends_on = [null_resource.bootstrap_cluster]
-//  triggers   = {
-//    first_master = values(openstack_compute_instance_v2.master_nodes)[0].id,
-//    lol          = "lol"
-//  }
-//  connection {
-//    type        = "ssh"
-//    port        = 2222
-//    host        = openstack_networking_floatingip_v2.fip.address
-//    user        = "ubuntu"
-//    private_key = file(var.private_key_path)
-//  }
-//
-//  provisioner "remote-exec" {
-//    inline = [
-//      "sudo kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml",
-//      "sleep 1",
-//    ]
-//  }
-//}
+  provisioner "remote-exec" {
+    inline = [
+      "sudo kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml",
+      "sleep 1",
+    ]
+  }
+
+}
 
 resource "null_resource" "master_join" {
   depends_on = [null_resource.bootstrap_cluster]
@@ -108,9 +109,60 @@ resource "null_resource" "worker_join" {
 
   provisioner "remote-exec" {
     inline = [
+      "echo KUBELET_EXTRA_ARGS=\"--cloud-provider=external\" | sudo tee /etc/default/kubelet",
       "sudo chmod +x worker_join.sh",
       "sudo ./worker_join.sh",
       "sleep 1",
     ]
+  }
+}
+
+resource "null_resource" "get_kube_cred" {
+  depends_on = [null_resource.bootstrap_cluster]
+
+  provisioner "local-exec" {
+    command = "scp -o \"StrictHostKeyChecking=no\" -i $DO_KEY -P $DO_PORT $DO_USER@$DO_HOST:~/.kube/config output/kubeconfig"
+
+    environment = {
+      DO_PORT = 2222
+      DO_HOST = openstack_networking_floatingip_v2.fip.address
+      DO_USER = "ubuntu"
+      DO_KEY  = var.private_key_path
+    }
+  }
+
+}
+
+resource "local_file" "create_os_config" {
+  depends_on = [null_resource.get_kube_cred]
+
+  content = templatefile("config/cloud-config.tmpl", {
+    os_user   = var.os_user
+    os_pass   = var.os_pass
+    os_url    = var.os_authurl
+    os_tid    = var.os_projectid 
+    os_subnet = openstack_networking_network_v2.network_v4.id
+  })
+  filename = "output/cloud-config"
+}
+
+resource "null_resource" "add_ske_stuff" {
+  depends_on = [local_file.create_os_config, null_resource.get_kube_cred]
+
+  provisioner "local-exec" {
+    command = "kubectl create secret -n kube-system generic cloud-config --from-literal=cloud.conf=\"$(cat output/cloud-config)\""
+
+    environment = {
+      KUBECONFIG = "output/kubeconfig"
+    }
+  }
+
+  provisioner "local-exec" {
+    command = "/bin/bash config/add-ske-stuff.sh "
+
+    environment = {
+      KUBECONFIG = "output/kubeconfig"
+      CLUSTER_NAME = var.cluster_name
+    }
   }
 }

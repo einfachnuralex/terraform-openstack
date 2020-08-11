@@ -1,26 +1,34 @@
 ## k8s ##
-//cluster_name           = ""
+//cluster_name = ""
 //control_plane_endpoint = ""
 
 ## instance ##
 master_node_names = [
-  "master_1",
+  "master-1",
 ]
 
 worker_node_names = [
-  "worker_1",
+  "worker-1",
+  "worker-2",
+  "worker-3",
+  "worker-4"
 ]
 
-lb_name          = "lb_1"
-image_id         = "38e194d3-16b9-43a7-af1d-9ffcaa98c746" // ubuntu_k8s_1.18.2_docker
-flavor_name      = "c1.2"
+image_id    = "38e194d3-16b9-43a7-af1d-9ffcaa98c746" // ubuntu_k8s_1.18.2_docker
+flavor_name = "c1.2"
 key_pair_name    = "ske-key"
 private_key_path = "auth/ske-key"
+pod_cidr = "10.244.0.0/16"
+node_cidr = "192.168.42.0/24"
 
-## network ##
-network_prefix             = "network"
-secgroup_prefix            = "secgroup"
-//allowed_address_pairs_cidr = ""
+# Google DNS Zone settings
+
+//dns_zone_name        = ""
+dns_zone_credentials = "auth/ske-dns-admin.json"
+//dns_zone_project     = ""
+dns_zone_region      = "eu-central1"
+
+## security group rules ##
 ext_ports = {
   ssh = {
     min      = 22

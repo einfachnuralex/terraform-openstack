@@ -1,5 +1,11 @@
 ---
 apiVersion: kubeadm.k8s.io/v1beta2
+kind: JoinConfiguration
+nodeRegistration:
+  kubeletExtraArgs:
+    cloud-provider: "external"
+---
+apiVersion: kubeadm.k8s.io/v1beta2
 kind: InitConfiguration
 nodeRegistration:
   kubeletExtraArgs:
@@ -7,12 +13,16 @@ nodeRegistration:
 ---
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: ClusterConfiguration
-kubernetesVersion: v1.18.2
+kubernetesVersion: v1.18.6
 clusterName: ${cluster_name}
 controlPlaneEndpoint: ${control_plane_endpoint}:6443
 networking:
-  podSubnet: "192.168.0.0/16"
+  podSubnet: "${pod_cidr}"
 apiServer:
+  certSANs:
+  - ${control_plane_endpoint}
+  - ${fip_address}
+  - api
   extraArgs:
     cloud-provider: "external"
 controllerManager:

@@ -1,12 +1,12 @@
 # Create loadbalancer
 resource "openstack_lb_loadbalancer_v2" "elastic_lb" {
-  name          = "elastic_lb_tcp"
+  name          = "${var.cluster_name}-lb-tcp"
   vip_subnet_id = openstack_networking_subnet_v2.subnet_v4.id
 }
 
 # Create listener for k8s
 resource "openstack_lb_listener_v2" "listener_k8s" {
-  name            = "listener_k8s"
+  name            = "${var.cluster_name}-listener-k8s"
   protocol        = "TCP"
   protocol_port   = 6443
   loadbalancer_id = openstack_lb_loadbalancer_v2.elastic_lb.id
@@ -14,7 +14,7 @@ resource "openstack_lb_listener_v2" "listener_k8s" {
 
 # Create ssh listener for first_master
 resource "openstack_lb_listener_v2" "listener_ssh" {
-  name            = "listener_ssh"
+  name            = "${var.cluster_name}-listener-ssh"
   protocol        = "TCP"
   protocol_port   = 2222
   loadbalancer_id = openstack_lb_loadbalancer_v2.elastic_lb.id
