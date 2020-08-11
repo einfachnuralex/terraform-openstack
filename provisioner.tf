@@ -142,7 +142,7 @@ resource "local_file" "create_os_config" {
     os_pass   = var.os_pass
     os_url    = var.os_authurl
     os_tid    = var.os_projectid 
-    os_subnet = openstack_networking_network_v2.network_v4.id
+    os_subnet = openstack_networking_subnet_v2.subnet_v4.id
   })
   filename = "output/cloud-config"
 }
