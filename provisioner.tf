@@ -66,7 +66,6 @@ resource "null_resource" "install_calico" {
       "sleep 1",
     ]
   }
-
 }
 
 resource "null_resource" "master_join" {
