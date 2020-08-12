@@ -32,6 +32,7 @@ override.tf.json
 # Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
 # example: *tfplan*
 **/auth/**
+**/output/**
 terraform.tfvars
 
 # Created by https://www.toptal.com/developers/gitignore/api/intellij

@@ -1,7 +1,7 @@
 # Instance creation
 resource "openstack_compute_instance_v2" "master_nodes" {
   for_each  = var.master_node_names
-  name      = each.key
+  name      = format("%s-%s", var.cluster_name, each.key)
   flavor_id = data.openstack_compute_flavor_v2.flavor.id
   key_pair  = var.key_pair_name
 
@@ -25,7 +25,7 @@ resource "openstack_compute_instance_v2" "master_nodes" {
 
 resource "openstack_compute_instance_v2" "worker_nodes" {
   for_each  = var.worker_node_names
-  name      = each.key
+  name      = format("%s-%s", var.cluster_name, each.key)
   flavor_id = data.openstack_compute_flavor_v2.flavor.id
   key_pair  = var.key_pair_name
 

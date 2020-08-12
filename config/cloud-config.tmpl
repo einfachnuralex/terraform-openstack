@@ -1,0 +1,17 @@
+[Global]
+region=RegionOne
+username=${os_user}
+password=${os_pass}
+auth-url=${os_url}
+tenant-id=${os_tid}
+domain-id=default
+ca-file=/etc/kubernetes/ca.pem
+
+[LoadBalancer]
+subnet-id=${os_subnet}
+lb-version=v2
+lb-provider=octavia
+use-octavia=true
+
+[BlockStorage]
+bs-version=auto
