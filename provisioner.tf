@@ -36,6 +36,8 @@ resource "null_resource" "bootstrap_cluster" {
   provisioner "remote-exec" {
     inline = [
       "echo 'ForwardAgent yes' >> ~/.ssh/config",
+      "echo -e 'nameserver 8.8.8.8\nnameserver 8.8.4.4\n' > resolv.conf",
+      "sudo mv resolv.conf /etc/",
       "sudo mv /tmp/kubeadm.conf ~/kubeadmconfig.yaml",
       "sudo mv /tmp/kubeadm-init.sh ~/kubeadm-init.sh",
       "sudo chmod +x kubeadm-init.sh",
@@ -49,7 +51,7 @@ resource "null_resource" "bootstrap_cluster" {
 
 resource "null_resource" "install_calico" {
   depends_on = [null_resource.bootstrap_cluster]
-  triggers   = {
+  triggers = {
     first_master = values(openstack_compute_instance_v2.master_nodes)[0].id
   }
   connection {
@@ -140,7 +142,7 @@ resource "local_file" "create_os_config" {
     os_user   = var.os_user
     os_pass   = var.os_pass
     os_url    = var.os_authurl
-    os_tid    = var.os_projectid 
+    os_tid    = var.os_projectid
     os_subnet = openstack_networking_subnet_v2.subnet_v4.id
   })
   filename = "output/cloud-config"
@@ -161,7 +163,7 @@ resource "null_resource" "add_ske_stuff" {
     command = "/bin/bash config/add-ske-stuff.sh "
 
     environment = {
-      KUBECONFIG = "output/kubeconfig"
+      KUBECONFIG   = "output/kubeconfig"
       CLUSTER_NAME = var.cluster_name
     }
   }
