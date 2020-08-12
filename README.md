@@ -1,30 +1,21 @@
 # terraform-openstack
 
-## Branches / states
-
-### master
-Automated Provisioning of:
-- master worker instances
-- kubeadm init on first_master
-- kubeadm join on masters / workers
-
-Suppoted OS: Ubuntu   
-Supported Kubernetes Version: 18.02
-
-### release/provisioner
-Automated Provisioning of:
-- master / worker instances
-- nginx loadbalancer (ipv6-lb to masters)
-
-Supported OS: Ubuntu
-
 ## Prerequisite
 - Terraform > v0.12.24
 - Openstack RC File
-- Google Cloud DNS Auth file (only for kubeadm-enablement)
+- Google Cloud DNS Auth file
 
 ## Usage
 1. `terraform init`
+1. copy `terraform.tfvars.template` to `terraform.tfvars` 
+1. set values for outcommended lines in `terraform.tfvars`
+1. add following to your `openstack rc file`:
+```
+export TF_VAR_os_authurl=$OS_AUTH_URL
+export TF_VAR_os_user=$OS_USERNAME
+export TF_VAR_os_pass=$OS_PASSWORD
+export TF_VAR_os_project=$OS_PROJECT_NAME
+export TF_VAR_os_projectid=$OS_PROJECT_ID
+```
 1. `source <openstack rc file>`
-1. set value for all outcommended lines in `terraform.tfvars`
 1. `terraform apply`
