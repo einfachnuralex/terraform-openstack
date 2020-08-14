@@ -1,12 +1,12 @@
 terraform {
   required_providers {
-    google = {
+    google    = {
       source = "hashicorp/google"
     }
-    local = {
+    local     = {
       source = "hashicorp/local"
     }
-    null = {
+    null      = {
       source = "hashicorp/null"
     }
     openstack = {

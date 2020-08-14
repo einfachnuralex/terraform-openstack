@@ -17,7 +17,8 @@ resource "openstack_networking_port_v2" "port_v4" {
   for_each           = setunion(var.master_node_names, var.worker_node_names)
   name               = format("%s-%s", var.cluster_name, each.key)
   network_id         = openstack_networking_network_v2.network_v4.id
-  security_group_ids = [openstack_networking_secgroup_v2.internal.id]
+  security_group_ids = [
+    openstack_networking_secgroup_v2.internal.id]
   admin_state_up     = "true"
 
   fixed_ip {
