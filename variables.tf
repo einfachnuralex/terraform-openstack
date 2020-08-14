@@ -83,17 +83,17 @@ variable "os_authurl" {
 }
 
 variable "dns_zone_name" {
-  type = string  
+  type = string
 }
 
 variable "dns_zone_credentials" {
-  type = string  
+  type = string
 }
 
 variable "dns_zone_project" {
-  type = string  
+  type = string
 }
 
 variable "dns_zone_region" {
-  type = string  
+  type = string
 }
