@@ -8,11 +8,11 @@ function bootstrapCluster() {
   echo -e "\n#### wait for dns entry ####\n"
   while [ "$(dig +short A ${control_plane_endpoint})" != ${fip_address} ]; do
     echo "shoud match ${fip_address} ...but doesn't"
+    dig A ${control_plane_endpoint}
     sudo systemd-resolve --flush-caches
     sleep 5
   done
 
-  # kubeadm init if not already done
   set -e
   echo -e "\n#### bootstrapping new cluster ####\n"
   sudo kubeadm init --config kubeadmconfig.yaml --v=5
@@ -27,6 +27,9 @@ function cleanUp() {
   rm -rf kubeadmconfig.yaml
 }
 
+# Set entry for CP in /etc/hosts
+sudo sed -i -e '1i${fip_address} '"${control_plane_endpoint}"'\' /etc/hosts
+
 if [ ! -f /etc/kubernetes/pki/ca.key ]; then
   bootstrapCluster
   echo -e "\n#### bootstrapp finished ####\n"
@@ -35,10 +38,11 @@ fi
 # create and copy worker- & master_join.sh
 set -e
 echo -e "\n#### create&copy master/worker joins ####\n"
+echo "sudo sed -i -e '1i${fip_address} '"${control_plane_endpoint}"'\' /etc/hosts" | tee worker_join.sh master_join.sh >/dev/null
+sudo kubeadm token create --print-join-command >>worker_join.sh 2>/dev/null
 
-sudo kubeadm token create --print-join-command >worker_join.sh 2>/dev/null
 certKey=$(sudo kubeadm init phase upload-certs --upload-certs 2>/dev/null | tail -n 1)
-sudo kubeadm token create --print-join-command --certificate-key $certKey >master_join.sh 2>/dev/null
+sudo kubeadm token create --print-join-command --certificate-key $certKey >>master_join.sh 2>/dev/null
 
 %{ for master_ip in master_ips ~}
 echo "copy master_join to ${master_ip}"
