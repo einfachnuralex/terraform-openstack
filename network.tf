@@ -42,7 +42,7 @@ resource "openstack_networking_subnetpool_v2" "subnet_pool_v6" {
 }
 
 # port creation
-resource "openstack_networking_port_v2" "port_instances" {
+resource "openstack_networking_port_v2" "port_instance" {
   for_each   = setunion(var.master_node_names, var.worker_node_names)
   name       = format("%s-%s", var.cluster_name, each.key)
   network_id = openstack_networking_network_v2.infra_net.id

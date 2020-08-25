@@ -1,7 +1,7 @@
 # Create loadbalancer
 resource "openstack_lb_loadbalancer_v2" "elastic_lb" {
   name           = "${var.cluster_name}-lb-tcp"
-  vip_network_id = openstack_networking_network_v2.network_v4.id
+  vip_network_id = openstack_networking_network_v2.infra_net.id
   //vip_subnet_id = openstack_networking_subnet_v2.subnet_v4.id
 }
 
