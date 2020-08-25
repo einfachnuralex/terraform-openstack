@@ -20,7 +20,11 @@ variable "image_id" {
   type = string
 }
 
-variable "pod_cidr" {
+variable "pod_cidr_v4" {
+  type = string
+}
+
+variable "pod_cidr_v6" {
   type = string
 }
 

@@ -5,18 +5,18 @@ resource "openstack_networking_network_v2" "infra_net" {
 }
 
 # Subnet creation
-resource "openstack_networking_subnet_v2" "infra_net_v4" {
-  name            = "${var.cluster_name}-subnet_v4"
-  network_id      = openstack_networking_network_v2.network_v4.id
-  cidr            = var.node_cidr
+resource "openstack_networking_subnet_v2" "subnet_v4" {
+  name          = "int-a-v4"
+  network_id    = openstack_networking_network_v2.infra_net.id
+  subnetpool_id = openstack_networking_subnetpool_v2.subnet_pool_v4.id
+  ip_version    = 4
   dns_nameservers = ["8.8.8.8", "8.8.4.4"]
-  ip_version      = 4
 }
 
-resource "openstack_networking_subnet_v2" "infra_net_v6" {
+resource "openstack_networking_subnet_v2" "subnet_v6" {
   name          = "int-a-v6"
-  network_id    = openstack_networking_network_v2.int-a.id
-  subnetpool_id = openstack_networking_subnetpool_v2.int-a-v6.id
+  network_id    = openstack_networking_network_v2.infra_net.id
+  subnetpool_id = openstack_networking_subnetpool_v2.subnet_pool_v6.id
   ip_version    = 6
 
   #no_gateway    = true
@@ -26,40 +26,72 @@ resource "openstack_networking_subnet_v2" "infra_net_v6" {
   dns_nameservers   = ["2001:4860:4860::8888", "2001:4860:4860::8844"]
 }
 
+# Subnet pool creation
+resource "openstack_networking_subnetpool_v2" "subnet_pool_v4" {
+  name          = "int-a-v4"
+  ip_version    = 4
+  prefixes      = ["10.101.0.0/20"]
+  min_prefixlen = 24
+}
 
-resource "openstack_networking_port_v2" "port_v4" {
+resource "openstack_networking_subnetpool_v2" "subnet_pool_v6" {
+  name          = "int-a-v6"
+  ip_version    = 6
+  prefixes      = ["fd00:0:1::/60"]
+  min_prefixlen = 64
+}
+
+# port creation
+resource "openstack_networking_port_v2" "port_instances" {
   for_each   = setunion(var.master_node_names, var.worker_node_names)
   name       = format("%s-%s", var.cluster_name, each.key)
-  network_id = openstack_networking_network_v2.network_v4.id
-  security_group_ids = [
-  openstack_networking_secgroup_v2.internal.id]
+  network_id = openstack_networking_network_v2.infra_net.id
+  security_group_ids = [openstack_networking_secgroup_v2.internal.id]
   admin_state_up = "true"
 
   fixed_ip {
     subnet_id = openstack_networking_subnet_v2.subnet_v4.id
   }
 
+  fixed_ip {
+    subnet_id = openstack_networking_subnet_v2.subnet_v6.id
+  }
+
   allowed_address_pairs {
-    ip_address = var.pod_cidr
+    ip_address = var.pod_cidr_v4
+  }
+  allowed_address_pairs {
+    ip_address = var.pod_cidr_v6
   }
 }
 
 # Router creation
-resource "openstack_networking_router_v2" "generic_v4" {
-  name                = "${var.cluster_name}-router-v4"
+resource "openstack_networking_router_v2" "public_router" {
+  name                = "public_router"
   external_network_id = data.openstack_networking_network_v2.floating_net.id
+}
+
+# data to get existing network id
+data "openstack_networking_network_v2" "floating_net" {
+  name = "floating-net"
 }
 
 # Router interface creation
 resource "openstack_networking_router_interface_v2" "router_interface_v4" {
-  router_id = openstack_networking_router_v2.generic_v4.id
+  router_id = openstack_networking_router_v2.public_router.id
   subnet_id = openstack_networking_subnet_v2.subnet_v4.id
+}
+
+resource "openstack_networking_router_interface_v2" "router_interface_v6" {
+  router_id = openstack_networking_router_v2.public_router.id
+  subnet_id = openstack_networking_subnet_v2.subnet_v6.id
 }
 
 resource "openstack_networking_secgroup_v2" "internal" {
   name = "${var.cluster_name}-int"
 }
 
+# secgroup creation
 resource "openstack_networking_secgroup_rule_v2" "ext_2_int" {
   for_each          = var.ext_ports
   description       = each.key
@@ -82,9 +114,4 @@ resource "openstack_networking_secgroup_rule_v2" "int_2_int" {
   port_range_max    = each.value.max
   remote_group_id   = openstack_networking_secgroup_v2.internal.id
   security_group_id = openstack_networking_secgroup_v2.internal.id
-}
-
-# data to get existing network id
-data "openstack_networking_network_v2" "floating_net" {
-  name = "floating-net"
 }
