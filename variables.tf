@@ -7,6 +7,11 @@ variable "control_plane_endpoint" {
   type = string
 }
 
+variable "k8s_version" {
+  type    = string
+  default = "v1.18.6"
+}
+
 ## instance ##
 variable "master_node_names" {
   type = set(string)
@@ -32,7 +37,11 @@ variable "node_cidr" {
   type = string
 }
 
-variable "srv_cidr" {
+variable "srv_cidr_v4" {
+  type = string
+}
+
+variable "srv_cidr_v6" {
   type = string
 }
 

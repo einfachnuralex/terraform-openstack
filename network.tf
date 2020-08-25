@@ -6,10 +6,10 @@ resource "openstack_networking_network_v2" "infra_net" {
 
 # Subnet creation
 resource "openstack_networking_subnet_v2" "subnet_v4" {
-  name          = "int-a-v4"
-  network_id    = openstack_networking_network_v2.infra_net.id
-  subnetpool_id = openstack_networking_subnetpool_v2.subnet_pool_v4.id
-  ip_version    = 4
+  name            = "int-a-v4"
+  network_id      = openstack_networking_network_v2.infra_net.id
+  subnetpool_id   = openstack_networking_subnetpool_v2.subnet_pool_v4.id
+  ip_version      = 4
   dns_nameservers = ["8.8.8.8", "8.8.4.4"]
 }
 
@@ -30,7 +30,7 @@ resource "openstack_networking_subnet_v2" "subnet_v6" {
 resource "openstack_networking_subnetpool_v2" "subnet_pool_v4" {
   name          = "int-a-v4"
   ip_version    = 4
-  prefixes      = ["10.101.0.0/20"]
+  prefixes      = ["192.168.42.0/24"]
   min_prefixlen = 24
 }
 
@@ -43,11 +43,11 @@ resource "openstack_networking_subnetpool_v2" "subnet_pool_v6" {
 
 # port creation
 resource "openstack_networking_port_v2" "port_instance" {
-  for_each   = setunion(var.master_node_names, var.worker_node_names)
-  name       = format("%s-%s", var.cluster_name, each.key)
-  network_id = openstack_networking_network_v2.infra_net.id
+  for_each           = setunion(var.master_node_names, var.worker_node_names)
+  name               = format("%s-%s", var.cluster_name, each.key)
+  network_id         = openstack_networking_network_v2.infra_net.id
   security_group_ids = [openstack_networking_secgroup_v2.internal.id]
-  admin_state_up = "true"
+  admin_state_up     = "true"
 
   fixed_ip {
     subnet_id = openstack_networking_subnet_v2.subnet_v4.id
