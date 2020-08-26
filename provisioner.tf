@@ -99,30 +99,6 @@ resource "null_resource" "worker_join" {
   }
 }
 
-resource "null_resource" "install_calico" {
-  depends_on = [
-    null_resource.master_join,
-    null_resource.worker_join
-  ]
-  triggers = {
-    first_master = values(openstack_compute_instance_v2.master_nodes)[0].id
-  }
-  connection {
-    type        = "ssh"
-    port        = 2222
-    host        = openstack_networking_floatingip_v2.fip.address
-    user        = "ubuntu"
-    private_key = file(var.private_key_path)
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "sudo kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml",
-      "sleep 1",
-    ]
-  }
-}
-
 resource "null_resource" "get_kube_cred" {
   depends_on = [
   null_resource.bootstrap_cluster]
@@ -152,6 +128,31 @@ resource "local_file" "create_os_config" {
     os_subnet = openstack_networking_subnet_v2.subnet_v4.id
   })
   filename = "output/cloud-config"
+}
+
+resource "null_resource" "install_calico" {
+  depends_on = [
+    null_resource.master_join,
+    null_resource.worker_join,
+    null_resource.get_kube_cred
+  ]
+  triggers = {
+    first_master = values(openstack_compute_instance_v2.master_nodes)[0].id
+  }
+  connection {
+    type        = "ssh"
+    port        = 2222
+    host        = openstack_networking_floatingip_v2.fip.address
+    user        = "ubuntu"
+    private_key = file(var.private_key_path)
+  }
+
+  provisioner "local-exec" {
+    inline = [
+      "sudo kubectl apply -f config/calico_v6.yaml",
+      "sleep 1",
+    ]
+  }
 }
 
 resource "null_resource" "add_ske_stuff" {
