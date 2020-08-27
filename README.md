@@ -9,7 +9,7 @@
 
 ## Preparation 
 1. Copy `openstack RC-File` to `auth/`
-2. Copy `dns Auth File` to `auth/dns-auth`
+2. Copy `dns Auth File` to `auth/dns-auth.json`
 3. Copy `private key` to `auth/ske-key`
 
 ```

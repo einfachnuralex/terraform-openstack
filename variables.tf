@@ -20,19 +20,20 @@ variable "private_key_path" {
 
 variable "dns_zone_credentials" {
   type        = string
-  default     = "auth/dns-auth"
+  default     = "auth/dns-auth.json"
   description = "Authentication file for public dns"
 }
 
 ## security rules
 variable "ext_ports" {
-  type    = map(object({
+  type = map(object({
     min      = number
     max      = number
     protocol = string
   }))
+
   default = {
-    ssh           = {
+    ssh = {
       min      = 22
       max      = 22
       protocol = "tcp"
@@ -42,46 +43,47 @@ variable "ext_ports" {
       max      = 32767
       protocol = "tcp"
     },
-    api           = {
+    api = {
       min      = 6443
       max      = 6443
       protocol = "tcp"
     }
   }
+}
 
-  variable "int_ports" {
-  type    = map(object({
+variable "int_ports" {
+  type = map(object({
     min      = number
     max      = number
     protocol = string
   }))
   default = {
-    ssh           = {
+    ssh = {
       min      = 22
       max      = 22
       protocol = "tcp"
     },
-    etcd          = {
+    etcd = {
       min      = 2379
       max      = 2380
       protocol = "tcp"
     },
-    api           = {
+    api = {
       min      = 6443
       max      = 6443
       protocol = "tcp"
     },
-    kubelet       = {
+    kubelet = {
       min      = 10250
       max      = 10250
       protocol = "tcp"
     },
-    scheduler     = {
+    scheduler = {
       min      = 10251
       max      = 10251
       protocol = "tcp"
     },
-    controller    = {
+    controller = {
       min      = 10252
       max      = 10252
       protocol = "tcp"
@@ -91,12 +93,12 @@ variable "ext_ports" {
       max      = 32767
       protocol = "tcp"
     },
-    bgp           = {
+    bgp = {
       min      = 179
       max      = 179
       protocol = "tcp"
     },
-    ip_in_ip      = {
+    ip_in_ip = {
       min      = 0
       max      = 0
       protocol = "4"
@@ -121,12 +123,12 @@ variable "k8s_version" {
   description = "kubernetes version (set via source-file)"
 }
 
-variable "master_node_count" {
+variable "master_count" {
   type        = number
   description = "number of master nodes (set via source-file)"
 }
 
-variable "worker_node_count" {
+variable "worker_count" {
   type        = number
   description = "number of worker nodes (set via source-file)"
 }
@@ -151,12 +153,12 @@ variable "node_cidr_v6" {
   description = "ipv6 pod cidr for the node-network (set via source-file)"
 }
 
-variable "srv_cidr_v4" {
+variable "svc_cidr_v4" {
   type        = string
   description = "ipv4 pod cidr for the service-network (set via source-file)"
 }
 
-variable "srv_cidr_v6" {
+variable "svc_cidr_v6" {
   type        = string
   description = "ipv6 pod cidr for the service-network (set via source-file)"
 }

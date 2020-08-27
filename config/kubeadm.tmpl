@@ -23,7 +23,7 @@ apiServer:
   - api-remote
 imageRepository: k8s.gcr.io
 networking:
-  serviceSubnet: "${srv_dual_cidr}"
+  serviceSubnet: "${svc_dual_cidr}"
   podSubnet: "${pod_dual_cidr}"
 featureGates:
   IPv6DualStack: true  

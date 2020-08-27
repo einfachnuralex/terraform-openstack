@@ -1,0 +1,91 @@
+## k8s ##
+cluster_name           = "rap-ipv6-test"
+control_plane_endpoint = "test.rapsn.gardener.ganter.dev"
+
+## instance ##
+master_count = 6
+worker_count = 5
+
+image_id         = "38e194d3-16b9-43a7-af1d-9ffcaa98c746" // ubuntu_k8s_1.18.2_docker
+flavor_name      = "c1.2"
+key_pair_name    = "ske-key"
+private_key_path = "auth/ske-key"
+pod_cidr_v4      = "10.244.0.0/16"
+pod_cidr_v6      = "fd02::/80"
+//node_cidr        = "192.168.42.0/24"
+srv_cidr_v4 = "172.16.0.0/16"
+srv_cidr_v6 = "fd03::/112"
+
+# Google DNS Zone settings
+
+dns_zone_name        = "gardener-test-2"
+dns_zone_credentials = "auth/gcp-dns-auth.json"
+dns_zone_project     = "n-1578486715742-95072"
+dns_zone_region      = "eu-central1"
+
+## security group rules ##
+ext_ports = {
+  ssh = {
+    min      = 22
+    max      = 22
+    protocol = "tcp"
+  },
+  node_port_tcp = {
+    min      = 30000
+    max      = 32767
+    protocol = "tcp"
+  },
+  api = {
+    min      = 6443
+    max      = 6443
+    protocol = "tcp"
+  }
+}
+
+int_ports = {
+  ssh = {
+    min      = 22
+    max      = 22
+    protocol = "tcp"
+  },
+  etcd = {
+    min      = 2379
+    max      = 2380
+    protocol = "tcp"
+  },
+  api = {
+    min      = 6443
+    max      = 6443
+    protocol = "tcp"
+  },
+  kubelet = {
+    min      = 10250
+    max      = 10250
+    protocol = "tcp"
+  },
+  scheduler = {
+    min      = 10251
+    max      = 10251
+    protocol = "tcp"
+  },
+  controller = {
+    min      = 10252
+    max      = 10252
+    protocol = "tcp"
+  },
+  node_port_tcp = {
+    min      = 30000
+    max      = 32767
+    protocol = "tcp"
+  },
+  bgp = {
+    min      = 179
+    max      = 179
+    protocol = "tcp"
+  },
+  ip_in_ip = {
+    min      = 0
+    max      = 0
+    protocol = "4"
+  }
+}
