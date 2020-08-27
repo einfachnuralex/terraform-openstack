@@ -54,7 +54,7 @@ resource "null_resource" "master_join" {
   triggers   = {
     master = join(", ", [for instance in openstack_compute_instance_v2.master_nodes : instance.id])
   }
-  count      = var.master_count - 1
+  count      = var.master_count > 1 ? var.master_count - 1 : 0
   connection {
     type         = "ssh"
     bastion_host = openstack_networking_floatingip_v2.fip.address
