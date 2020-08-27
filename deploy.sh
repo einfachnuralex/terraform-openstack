@@ -5,8 +5,8 @@ OPENSTACK_PROJECT="ske-testing-3"
 # set cluster vars
 CLUSTER_NAME="rapsn-test-refactor"
 K8S_VERSION="v1.18.6"
-MASTER_NODE_COUNT="1"
-WORKER_NODE_COUNT="1"
+MASTER_COUNT="1"
+WORKER_COUNT="1"
 KEY_PAIR_NAME="ske-key"
 
 #set network vars
@@ -34,8 +34,8 @@ export TF_VAR_os_project=$OS_PROJECT_NAME
 export TF_VAR_os_projectid=$OS_PROJECT_ID
 export TF_VAR_cluster_name=$CLUSTER_NAME
 export TF_VAR_k8s_version=$K8S_VERSION
-export TF_VAR_master_node_count=$MASTER_NODE_COUNT
-export TF_VAR_worker_node_count=$WORKER_NODE_COUNT
+export TF_VAR_master_count=$MASTER_COUNT
+export TF_VAR_worker_count=$WORKER_COUNT
 export TF_VAR_key_pair_name=$KEY_PAIR_NAME
 export TF_VAR_pod_cidr_v4=$POD_CIDR_v4
 export TF_VAR_pod_cidr_v6=$POD_CIDR_v6
@@ -43,11 +43,11 @@ export TF_VAR_svc_cidr_v4=$SVC_CIDR_v4
 export TF_VAR_svc_cidr_v6=$SVC_CIDR_v6
 export TF_VAR_node_cidr_v4=$NODE_CIDR_v4
 export TF_VAR_node_cidr_v6=$NODE_CIDR_v6
-export TF_VAR_control-plane-endpoint=${CLUSTER_NAME}.${DOMAIN}
+export TF_VAR_control_plane_endpoint=${CLUSTER_NAME}.${DOMAIN}
 export TF_VAR_dns_zone_name=$DNS_ZONE_NAME
 export TF_VAR_dns_zone_project=$DNS_ZONE_PROJECT
 export TF_VAR_dns_zone_region=$DNS_ZONE_REGION
 
-terraform apply
+
 
 
