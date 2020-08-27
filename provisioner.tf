@@ -28,7 +28,7 @@ resource "null_resource" "bootstrap_cluster" {
 
   provisioner "file" {
     content = templatefile("config/kubeadm-init.sh", {
-      master_ips             = slice([for instance in openstack_compute_instance_v2.master_nodes : instance.access_ip_v4], 1, length(var.master_node_names))
+      master_ips             = slice([for instance in openstack_compute_instance_v2.master_nodes : instance.access_ip_v4], 1, var.master_count)
       worker_ips             = [for instance in openstack_compute_instance_v2.worker_nodes : instance.access_ip_v4]
       fip_address            = openstack_networking_floatingip_v2.fip.address
       control_plane_endpoint = var.control_plane_endpoint
@@ -54,12 +54,12 @@ resource "null_resource" "master_join" {
   triggers = {
     master = join(", ", [for instance in openstack_compute_instance_v2.master_nodes : instance.id])
   }
-  for_each = toset(slice(tolist(var.master_node_names), 1, length(var.master_node_names)))
+  count = var.master_count
   connection {
     type         = "ssh"
     bastion_host = openstack_networking_floatingip_v2.fip.address
     bastion_port = 2222
-    host         = openstack_compute_instance_v2.master_nodes[each.key].access_ip_v4
+    host         = openstack_compute_instance_v2.master_nodes.*+1.access_ip_v4
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
   }
@@ -79,12 +79,12 @@ resource "null_resource" "worker_join" {
   triggers = {
     worker = join(", ", [for instance in openstack_compute_instance_v2.worker_nodes : instance.id])
   }
-  for_each = var.worker_node_names
+  count = var.worker_count
   connection {
     type         = "ssh"
     bastion_host = openstack_networking_floatingip_v2.fip.address
     bastion_port = 2222
-    host         = openstack_compute_instance_v2.worker_nodes[each.key].access_ip_v4
+    host         = openstack_compute_instance_v2.worker_nodes.*.access_ip_v4
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
   }
