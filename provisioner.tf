@@ -54,12 +54,12 @@ resource "null_resource" "master_join" {
   triggers   = {
     master = join(", ", [for instance in openstack_compute_instance_v2.master_nodes : instance.id])
   }
-  count      = var.master_count
+  count      = var.master_count - 1
   connection {
     type         = "ssh"
     bastion_host = openstack_networking_floatingip_v2.fip.address
     bastion_port = 2222
-    host         = openstack_compute_instance_v2.master_nodes.*+1.access_ip_v4
+    host         = openstack_compute_instance_v2.master_nodes.access_ip_v4[count.index+1]
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
   }
