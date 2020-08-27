@@ -5,7 +5,7 @@ nodeRegistration:
   kubeletExtraArgs:
     cloud-provider: "external"
 ---
-apiVersion: kubeadm.k8s.io/v1beta2
+apiVersion: kubeadm.k8s.io/v1beta1
 kind: InitConfiguration
 nodeRegistration:
   kubeletExtraArgs:
@@ -13,19 +13,28 @@ nodeRegistration:
 ---
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: ClusterConfiguration
-kubernetesVersion: v1.18.6
+kubernetesVersion: "${k8s_version}"
 clusterName: ${cluster_name}
 controlPlaneEndpoint: ${control_plane_endpoint}:6443
-networking:
-  podSubnet: "${pod_cidr}"
-  serviceSubnet: "${srv_cidr}"  
 apiServer:
   certSANs:
-  - ${control_plane_endpoint}
-  - ${fip_address}
+  - 193.148.163.6
   - api
-  extraArgs:
-    cloud-provider: "external"
-controllerManager:
-  extraArgs:
-    cloud-provider: "external"
+  - api-remote
+imageRepository: k8s.gcr.io
+networking:
+  serviceSubnet: "${srv_dual_cidr}"
+  podSubnet: "${pod_dual_cidr}"
+featureGates:
+  IPv6DualStack: true  
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+mode: ipvs
+featureGates:
+  IPv6DualStack: true
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+featureGates:
+  IPv6DualStack: true

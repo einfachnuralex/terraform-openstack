@@ -15,7 +15,7 @@ resource "openstack_compute_instance_v2" "master_nodes" {
   }
 
   network {
-    port = openstack_networking_port_v2.port_v4[each.key].id
+    port = openstack_networking_port_v2.port_instance[each.key].id
   }
 }
 
@@ -35,7 +35,7 @@ resource "openstack_compute_instance_v2" "worker_nodes" {
   }
 
   network {
-    port = openstack_networking_port_v2.port_v4[each.key].id
+    port = openstack_networking_port_v2.port_instance[each.key].id
   }
 }
 
