@@ -59,7 +59,7 @@ resource "null_resource" "master_join" {
     type         = "ssh"
     bastion_host = openstack_networking_floatingip_v2.fip.address
     bastion_port = 2222
-    host         = openstack_compute_instance_v2.master_nodes.access_ip_v4[count.index+1]
+    host         = openstack_compute_instance_v2.master_nodes.*.access_ip_v4[count.index+1]
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
   }
@@ -84,7 +84,7 @@ resource "null_resource" "worker_join" {
     type         = "ssh"
     bastion_host = openstack_networking_floatingip_v2.fip.address
     bastion_port = 2222
-    host         = openstack_compute_instance_v2.worker_nodes.*.access_ip_v4
+    host         = openstack_compute_instance_v2.worker_nodes.*.access_ip_v4[count.index]
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
   }
