@@ -1,8 +1,8 @@
 resource "null_resource" "bootstrap_cluster" {
   depends_on = [
     openstack_lb_member_v2.member_ssh,
-  openstack_compute_instance_v2.master_nodes]
-  triggers = {
+    openstack_compute_instance_v2.master_nodes]
+  triggers   = {
     master = join(", ", [for instance in openstack_compute_instance_v2.master_nodes : instance.id]),
     worker = join(", ", [for instance in openstack_compute_instance_v2.worker_nodes : instance.id]),
   }
@@ -15,7 +15,7 @@ resource "null_resource" "bootstrap_cluster" {
   }
 
   provisioner "file" {
-    content = templatefile("config/kubeadm.tmpl", {
+    content     = templatefile("config/kubeadm.tmpl", {
       control_plane_endpoint = var.control_plane_endpoint
       cluster_name           = var.cluster_name
       k8s_version            = var.k8s_version
@@ -27,8 +27,8 @@ resource "null_resource" "bootstrap_cluster" {
   }
 
   provisioner "file" {
-    content = templatefile("config/kubeadm-init.sh", {
-      master_ips             = slice([for instance in openstack_compute_instance_v2.master_nodes : instance.access_ip_v4], 1, length(var.master_node_names))
+    content     = templatefile("config/kubeadm-init.sh", {
+      master_ips             = slice([for instance in openstack_compute_instance_v2.master_nodes : instance.access_ip_v4], 1, var.master_count)
       worker_ips             = [for instance in openstack_compute_instance_v2.worker_nodes : instance.access_ip_v4]
       fip_address            = openstack_networking_floatingip_v2.fip.address
       control_plane_endpoint = var.control_plane_endpoint
@@ -50,16 +50,16 @@ resource "null_resource" "bootstrap_cluster" {
 
 resource "null_resource" "master_join" {
   depends_on = [
-  null_resource.bootstrap_cluster]
-  triggers = {
+    null_resource.bootstrap_cluster]
+  triggers   = {
     master = join(", ", [for instance in openstack_compute_instance_v2.master_nodes : instance.id])
   }
-  for_each = toset(slice(tolist(var.master_node_names), 1, length(var.master_node_names)))
+  count      = var.master_count > 1 ? var.master_count - 1 : 0
   connection {
     type         = "ssh"
     bastion_host = openstack_networking_floatingip_v2.fip.address
     bastion_port = 2222
-    host         = openstack_compute_instance_v2.master_nodes[each.key].access_ip_v4
+    host         = openstack_compute_instance_v2.master_nodes.*.access_ip_v4[count.index+1]
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
   }
@@ -75,16 +75,16 @@ resource "null_resource" "master_join" {
 
 resource "null_resource" "worker_join" {
   depends_on = [
-  null_resource.bootstrap_cluster]
-  triggers = {
+    null_resource.bootstrap_cluster]
+  triggers   = {
     worker = join(", ", [for instance in openstack_compute_instance_v2.worker_nodes : instance.id])
   }
-  for_each = var.worker_node_names
+  count      = var.worker_count
   connection {
     type         = "ssh"
     bastion_host = openstack_networking_floatingip_v2.fip.address
     bastion_port = 2222
-    host         = openstack_compute_instance_v2.worker_nodes[each.key].access_ip_v4
+    host         = openstack_compute_instance_v2.worker_nodes.*.access_ip_v4[count.index]
     user         = "ubuntu"
     private_key  = file(var.private_key_path)
   }
@@ -101,7 +101,7 @@ resource "null_resource" "worker_join" {
 
 resource "null_resource" "get_kube_cred" {
   depends_on = [
-  null_resource.bootstrap_cluster]
+    null_resource.bootstrap_cluster]
 
   provisioner "local-exec" {
     command = "mkdir -p output && scp -o \"StrictHostKeyChecking=no\" -i $DO_KEY -P $DO_PORT $DO_USER@$DO_HOST:~/.kube/config output/kubeconfig"
@@ -120,7 +120,7 @@ resource "local_file" "create_os_config" {
     null_resource.get_kube_cred
   ]
 
-  content = templatefile("config/cloud-config.tmpl", {
+  content  = templatefile("config/cloud-config.tmpl", {
     os_user   = var.os_user
     os_pass   = var.os_pass
     os_url    = var.os_authurl
@@ -161,7 +161,7 @@ resource "null_resource" "add_ske_stuff" {
   ]
 
   provisioner "local-exec" {
-    command = <<EOT
+    command     = <<EOT
       kubectl create secret -n kube-system generic cloud-config --from-literal=cloud.conf="$(cat output/cloud-config)";
       kubectl apply -f config/calico_v6.yaml
       EOT
@@ -171,7 +171,7 @@ resource "null_resource" "add_ske_stuff" {
   }
 
   provisioner "local-exec" {
-    command = "/bin/bash config/add-ske-stuff.sh "
+    command     = "/bin/bash config/add-ske-stuff.sh "
     environment = {
       KUBECONFIG   = "output/kubeconfig"
       CLUSTER_NAME = var.cluster_name

@@ -48,9 +48,8 @@ variable "ext_ports" {
       protocol = "tcp"
     }
   }
-}
 
-variable "int_ports" {
+  variable "int_ports" {
   type    = map(object({
     min      = number
     max      = number

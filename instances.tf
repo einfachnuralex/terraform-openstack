@@ -1,7 +1,7 @@
 # Instance creation
 resource "openstack_compute_instance_v2" "master_nodes" {
-  for_each  = var.master_node_names
-  name      = format("%s-%s", var.cluster_name, each.key)
+  count = var.master_count
+  name      = format("%s-%s", var.cluster_name, "m${count.index}")
   flavor_id = data.openstack_compute_flavor_v2.flavor.id
   key_pair  = var.key_pair_name
 
@@ -15,13 +15,13 @@ resource "openstack_compute_instance_v2" "master_nodes" {
   }
 
   network {
-    port = openstack_networking_port_v2.port_instance[each.key].id
+    port = openstack_networking_port_v2.port_master.*.id[count.index]
   }
 }
 
 resource "openstack_compute_instance_v2" "worker_nodes" {
-  for_each  = var.worker_node_names
-  name      = format("%s-%s", var.cluster_name, each.key)
+  count = var.worker_count
+  name      = format("%s-%s", var.cluster_name, "w${count.index}")
   flavor_id = data.openstack_compute_flavor_v2.flavor.id
   key_pair  = var.key_pair_name
 
@@ -35,7 +35,7 @@ resource "openstack_compute_instance_v2" "worker_nodes" {
   }
 
   network {
-    port = openstack_networking_port_v2.port_instance[each.key].id
+    port = openstack_networking_port_v2.port_worker.*.id[count.index]
   }
 }
 
