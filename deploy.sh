@@ -24,6 +24,16 @@ DNS_ZONE_PROJECT="n-1578486715742-95072"
 DNS_ZONE_REGION="eu-central1"
 
 # script section
+declare -a requiredFiles=("auth/${OPENSTACK_PROJECT}-openrc.sh" "auth/ske-key" "auth/dns-auth.json")
+for file in "${requiredFiles[@]}" ; do
+  result+=$(test -f "$file" || echo "$file\n";)
+done
+if [ ! -z "$result" ]; then
+  echo -e "Following files are missing: "
+  echo -e "$result"
+  exit
+fi
+
 # shellcheck source=auth/${OPENSTACK_PROJECT}-openrc.sh
 source auth/${OPENSTACK_PROJECT}-openrc.sh
 
@@ -47,7 +57,6 @@ export TF_VAR_control_plane_endpoint=${CLUSTER_NAME}.${DOMAIN}
 export TF_VAR_dns_zone_name=$DNS_ZONE_NAME
 export TF_VAR_dns_zone_project=$DNS_ZONE_PROJECT
 export TF_VAR_dns_zone_region=$DNS_ZONE_REGION
-
 
 
 
