@@ -58,5 +58,4 @@ export TF_VAR_dns_zone_name=$DNS_ZONE_NAME
 export TF_VAR_dns_zone_project=$DNS_ZONE_PROJECT
 export TF_VAR_dns_zone_region=$DNS_ZONE_REGION
 
-
-
+terraform apply
