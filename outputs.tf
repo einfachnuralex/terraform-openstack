@@ -19,5 +19,5 @@ output "loadbalancer_public_ip" {
 }
 
 output "test" {
-  value = replace(openstack_compute_instance_v2.master_nodes.*.access_ip_v6[count.index], "[]","")
+  value = replace(openstack_compute_instance_v2.master_nodes.0.access_ip_v6, "[]","")
 }
