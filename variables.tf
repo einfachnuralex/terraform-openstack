@@ -9,16 +9,15 @@ variable "control_plane_endpoint" {
 
 variable "k8s_version" {
   type    = string
-  default = "v1.18.6"
 }
 
 ## instance ##
-variable "master_node_names" {
-  type = set(string)
+variable "master_count" {
+  type = number
 }
 
-variable "worker_node_names" {
-  type = set(string)
+variable "worker_count" {
+  type = number
 }
 
 variable "image_id" {
