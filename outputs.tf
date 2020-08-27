@@ -17,3 +17,7 @@ output "worker_info" {
 output "loadbalancer_public_ip" {
   value = openstack_networking_floatingip_v2.fip.address
 }
+
+output "test" {
+  value = replace(openstack_compute_instance_v2.master_nodes.*.access_ip_v6[count.index], "[]","")
+}
