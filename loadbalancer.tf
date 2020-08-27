@@ -39,7 +39,7 @@ resource "openstack_lb_pool_v2" "pool_ssh" {
 resource "openstack_lb_member_v2" "member_k8s" {
   count = var.master_count
   name          = format("%s-%s", "master-member", count.index)
-  address       = openstack_compute_instance_v2.master_nodes.*.access_ip_v4[count.index]
+  address       = openstack_compute_instance_v2.master_nodes.*.access_ip_v6[count.index]
   protocol_port = 6443
   pool_id       = openstack_lb_pool_v2.pool_k8s.id
   subnet_id     = openstack_networking_subnet_v2.subnet_v4.id
@@ -47,7 +47,7 @@ resource "openstack_lb_member_v2" "member_k8s" {
 
 resource "openstack_lb_member_v2" "member_ssh" {
   name          = openstack_compute_instance_v2.master_nodes[0].name
-  address       = openstack_compute_instance_v2.master_nodes[0].access_ip_v4
+  address       = openstack_compute_instance_v2.master_nodes[0].access_ip_v6
   protocol_port = 22
   pool_id       = openstack_lb_pool_v2.pool_ssh.id
   subnet_id     = openstack_networking_subnet_v2.subnet_v4.id
