@@ -5,11 +5,13 @@
 - Openstack RC File
 - Google Cloud DNS Auth file
 
-## Usage
-1. `terraform init`
-1. copy `terraform.tfvars.template` to `terraform.tfvars` 
-1. set values for outcommended lines in `terraform.tfvars`
-1. add following to your `openstack rc file`:
+## Installation
+
+## Preparation 
+1. Copy `openstack RC-File` to `auth/`
+2. Copy `dns Auth File` to `auth/dns-auth`
+3. Copy `private key` to `auth/ske-key`
+
 ```
 export TF_VAR_os_authurl=$OS_AUTH_URL
 export TF_VAR_os_user=$OS_USERNAME
