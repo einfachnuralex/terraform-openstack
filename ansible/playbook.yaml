@@ -1,0 +1,16 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Create File
+      file:
+        path: /home/ubuntu/test
+        state: touch
+        owner: ubuntu
+        group: ubuntu
+    - name: "Create crictl Config"
+      blockinfile:
+        create: yes
+        path: /home/ubuntu/test
+        block: |
+          importante configurante
