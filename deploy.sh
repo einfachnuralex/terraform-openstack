@@ -3,7 +3,7 @@
 OPENSTACK_PROJECT="ske-testing-3"
 
 # set cluster vars
-CLUSTER_NAME="rapsn-test-refactor"
+CLUSTER_NAME="rapsn-test-ansible"
 K8S_VERSION="v1.18.6"
 MASTER_COUNT="1"
 WORKER_COUNT="1"
@@ -36,7 +36,7 @@ fi
 
 if [ "$1" == "destroy" ]; then
   command="destroy"
-elif [ "$1" == "apply" ]; then
+elif [ "$1" == "" ]; then
   command="apply"
 else
   echo -e "Usage: deploy.sh <command>\n"
