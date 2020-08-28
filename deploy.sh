@@ -41,6 +41,7 @@ else
   echo "Usage: deploy.sh <command>
         deploy.sh           deploy infrastructure with terraform and ansible
         deploy.sh destroy   destroy managed infrastructure"
+        exit
 fi
 
 # shellcheck source=auth/${OPENSTACK_PROJECT}-openrc.sh
