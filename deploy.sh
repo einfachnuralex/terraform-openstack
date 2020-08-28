@@ -36,6 +36,7 @@ fi
 
 if [ "$1" == "destroy" ]; then
   terraform destroy
+  exit
 else
   echo "Usage: deploy.sh <command>
         deploy.sh           deploy infrastructure with terraform and ansible
