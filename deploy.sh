@@ -24,7 +24,6 @@ DNS_ZONE_PROJECT="n-1578486715742-95072"
 DNS_ZONE_REGION="eu-central1"
 
 # script section
-command="apply"
 declare -a requiredFiles=("auth/${OPENSTACK_PROJECT}-openrc.sh" "auth/ske-key" "auth/dns-auth.json")
 for file in "${requiredFiles[@]}" ; do
   result+=$(test -f "$file" || echo "$file\n";)
@@ -37,6 +36,8 @@ fi
 
 if [ "$1" == "destroy" ]; then
   command="destroy"
+elif [ "$1" == "apply" ]; then
+  command="apply"
 else
   echo -e "Usage: deploy.sh <command>\n"
   echo "deploy.sh           deploy infrastructure with terraform and ansible"
