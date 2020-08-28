@@ -38,9 +38,9 @@ if [ "$1" == "destroy" ]; then
   terraform destroy
   exit
 else
-  echo "Usage: deploy.sh <command>
-        deploy.sh           deploy infrastructure with terraform and ansible
-        deploy.sh destroy   destroy managed infrastructure"
+  echo "Usage: deploy.sh <command>"
+  echo "deploy.sh           deploy infrastructure with terraform and ansible"
+  echo "deploy.sh destroy   destroy managed infrastructure"""
         exit
 fi
 
