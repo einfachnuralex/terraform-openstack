@@ -34,6 +34,14 @@ if [ ! -z "$result" ]; then
   exit
 fi
 
+if [ "$1" == "destroy" ]; then
+  terraform destroy
+else
+  echo "Usage: deploy.sh <command>
+        deploy.sh           deploy infrastructure with terraform and ansible
+        deploy.sh destroy   destroy managed infrastructure"
+fi
+
 # shellcheck source=auth/${OPENSTACK_PROJECT}-openrc.sh
 source auth/${OPENSTACK_PROJECT}-openrc.sh
 
