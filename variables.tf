@@ -168,23 +168,23 @@ variable "key_pair_name" {
   description = "name of an existing key, to access instance via ssh (set via source-file)"
 }
 
-variable "os_user" {
+variable "openstack_user" {
   type = string
 }
 
-variable "os_pass" {
+variable "openstack_pass" {
   type = string
 }
 
-variable "os_project" {
+variable "openstack_project" {
   type = string
 }
 
-variable "os_projectid" {
+variable "openstack_projectid" {
   type = string
 }
 
-variable "os_authurl" {
+variable "openstack_authurl" {
   type = string
 }
 

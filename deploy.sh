@@ -48,11 +48,11 @@ fi
 # shellcheck source=auth/${OPENSTACK_PROJECT}-openrc.sh
 source auth/${OPENSTACK_PROJECT}-openrc.sh
 
-export TF_VAR_os_authurl=$OS_AUTH_URL
-export TF_VAR_os_user=$OS_USERNAME
-export TF_VAR_os_pass=$OS_PASSWORD
-export TF_VAR_os_project=$OS_PROJECT_NAME
-export TF_VAR_os_projectid=$OS_PROJECT_ID
+export TF_VAR_openstack_authurl=$OS_AUTH_URL
+export TF_VAR_openstack_user=$OS_USERNAME
+export TF_VAR_openstack_pass=$OS_PASSWORD
+export TF_VAR_openstack_project=$OS_PROJECT_NAME
+export TF_VAR_openstack_projectid=$OS_PROJECT_ID
 export TF_VAR_cluster_name=$CLUSTER_NAME
 export TF_VAR_k8s_version=$K8S_VERSION
 export TF_VAR_master_count=$MASTER_COUNT
