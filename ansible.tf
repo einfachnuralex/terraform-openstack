@@ -10,5 +10,5 @@ resource "local_file" "create_os_config" {
       address = worker.access_ip_v4
     }]
   })
-  filename = "output/cloud-config"
+  filename = "ansible/hosts"
 }
