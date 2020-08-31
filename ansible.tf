@@ -1,7 +1,7 @@
 resource "local_file" "create_ansible_bastion_config" {
   depends_on = [openstack_networking_floatingip_v2.fip]
 
-  content = "ansible_ssh_common_args: '-o ProxyCommand=\"ssh -v -W %h:%p ubuntu@${openstack_networking_floatingip_v2.fip.address} -p 2222\"'"
+  content  = "ansible_ssh_common_args: '-o ProxyCommand=\"ssh -v -W %h:%p ubuntu@${openstack_networking_floatingip_v2.fip.address} -p 2222\"'"
   filename = "ansible/group_vars/all.yaml"
 }
 
@@ -12,14 +12,14 @@ resource "local_file" "create_ansible_inventory" {
   ]
 
   content  = templatefile("config/ansible-host.tmpl", {
-    ssh_user      = "ubuntu"
+    ssh_user     = "ubuntu"
     master_nodes = [for master in openstack_compute_instance_v2.master_nodes : {
       hostname = master.name
-      address = master.access_ip_v4
+      address  = master.access_ip_v4
     }]
     worker_nodes = [for worker in openstack_compute_instance_v2.worker_nodes : {
       hostname = worker.name
-      address = worker.access_ip_v4
+      address  = worker.access_ip_v4
     }]
   })
   filename = "ansible/hosts"

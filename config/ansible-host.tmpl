@@ -1,9 +1,9 @@
 [masters]
 %{ for master in master_nodes ~}
-${master.hostname} ansible_user=${os_user} ansible_host=${master.address}
+${master.hostname} ansible_user=${ssh_user} ansible_host=${master.address}
 %{ endfor ~}
 
 [workers]
 %{ for worker in worker_nodes ~}
-${worker.hostname} ansible_user=${os_user} ansible_host=${worker.address}
+${worker.hostname} ansible_user=${ssh_user} ansible_host=${worker.address}
 %{ endfor ~}
