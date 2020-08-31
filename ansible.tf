@@ -1,5 +1,5 @@
 resource "local_file" "create_os_config" {
-  content  = templatefile("config/ansible-hosts.tmpl", {
+  content  = templatefile("config/ansible-host.tmpl", {
     os_user      = var.os_user
     master_nodes = [for master in openstack_compute_instance_v2.master_nodes : {
       hostname = master.name
