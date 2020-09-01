@@ -5,7 +5,7 @@ OPENSTACK_PROJECT="ske-testing-3"
 # set cluster vars
 CLUSTER_NAME="rapsn-test-ansible"
 K8S_VERSION="v1.18.6"
-MASTER_COUNT="1"
+MASTER_COUNT="2"
 WORKER_COUNT="1"
 KEY_PAIR_NAME="ske-key"
 

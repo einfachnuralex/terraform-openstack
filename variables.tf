@@ -6,6 +6,12 @@ variable "image_id" {
   description = "id of the os-image for nodes (default: ubuntu)"
 }
 
+variable "ssh_user" {
+  type = string
+  default = "ubuntu"
+  description = "os user to login via ssh"
+}
+
 variable "flavor_name" {
   type        = string
   default     = "c1.2"

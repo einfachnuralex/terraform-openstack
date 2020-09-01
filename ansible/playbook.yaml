@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: masters[0]
   become: true
   tasks:
     - name: Create File
@@ -8,9 +8,25 @@
         state: touch
         owner: ubuntu
         group: ubuntu
-    - name: "Create crictl Config"
+    - name: "Create test file"
       blockinfile:
         create: yes
+        path: /home/ubuntu/first_master
+        block: |
+          importante configurante
+
+- hosts: worker
+  become: true
+  tasks:
+    - name: Create File
+      file:
         path: /home/ubuntu/test
+        state: touch
+        owner: ubuntu
+        group: ubuntu
+    - name: "Create test file"
+      blockinfile:
+        create: yes
+        path: /home/ubuntu/worker
         block: |
           importante configurante
