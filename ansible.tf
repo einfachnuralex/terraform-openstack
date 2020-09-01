@@ -30,5 +30,9 @@ resource "null_resource" "ansible" {
 
   provisioner "local-exec" {
     command = "ansible-playbook -i ansible/hosts ansible/playbook.yaml"
+
+    environment = {
+      ANSIBLE_HOST_KEY_CHECKING = false
+    }
   }
 }
