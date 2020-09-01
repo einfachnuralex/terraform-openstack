@@ -8,7 +8,7 @@ resource "local_file" "create_ansible_cfg" {
     inventory = ./hosts.ini
 
     [ssh_connection]
-    ssh_args = -o ControlMaster=auto -o ControlPersist=30m -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ForwardAgent=yes -o ProxyCommand="ssh -W %h:%p ${var.ssh_user}@${openstack_networking_floatingip_v2.fip.address} -p 2222"
+    ssh_args = -F ./ssh_config -o ControlMaster=auto -o ControlPersist=30m -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ForwardAgent=yes -o ProxyCommand="ssh -W %h:%p ${var.ssh_user}@${openstack_networking_floatingip_v2.fip.address} -p 22"
   EOF
   filename = "ansible/ansible.cfg"
 }
@@ -49,15 +49,27 @@ resource "local_file" "create_kubeadm_config" {
   filename = "output/kubeadm.yaml"
 }
 
+resource "local_file" "create_os_config" {
+  content = templatefile("config/cloud-config.tmpl", {
+    os_user   = var.openstack_user
+    os_pass   = var.openstack_pass
+    os_url    = var.openstack_authurl
+    os_tid    = var.openstack_projectid
+    os_subnet = openstack_networking_subnet_v2.subnet_v4.id
+  })
+  filename = "output/cloud-config"
+}
+
 resource "null_resource" "ansible_runner" {
   depends_on = [
     local_file.create_ansible_inventory,
     local_file.create_ansible_cfg,
-    openstack_lb_member_v2.member_ssh
+    openstack_lb_loadbalancer_v2.elastic_lb,
+    openstack_lb_member_v2.member_k8s,
+    openstack_lb_member_v2.member_ssh,
   ]
   triggers = {
-    master = join(", ", [for instance in openstack_compute_instance_v2.master_nodes : instance.id])
-    workers = join(", ", [for instance in openstack_compute_instance_v2.worker_nodes : instance.id])
+    always_run = timestamp()
   }
 
   provisioner "local-exec" {
