@@ -1,0 +1,28 @@
+---
+## Checks
+# check if first_master is already initialized
+- name: Check if cluster is initialized
+  stat:
+    path: /etc/kubernetes/pki/ca.key
+  register: isInitialized
+
+## Tasks
+- name: Copy file
+  copy:
+    src: ../output/kubeadm.yaml
+    dest: /tmp/kubeadm.yaml
+  when: not isInitialized.stat.exists
+
+- name: Initialize the Kubernetes cluster using kubeadm
+  command: kubeadm init --config /tmp/kubeadm.yaml
+  when: not isInitialized.stat.exists
+
+- name: Get kubeadm join command
+  command: kubeadm token create --print-join-command
+  register: kubeJoinCmd
+
+## CleanUp
+- name: Remove unneeded config files
+  file:
+    path: /tmp/kubeadm.yaml
+    state: absent

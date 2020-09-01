@@ -6,7 +6,7 @@ OPENSTACK_PROJECT="ske-testing-3"
 CLUSTER_NAME="rapsn-test-ansible"
 K8S_VERSION="v1.18.6"
 MASTER_COUNT="2"
-WORKER_COUNT="1"
+WORKER_COUNT="2"
 KEY_PAIR_NAME="ske-key"
 
 #set network vars
@@ -39,9 +39,9 @@ if [ "$1" == "destroy" ]; then
 elif [ "$1" == "" ]; then
   command="apply"
 else
-  echo -e "Usage: deploy.sh <command>\n"
+  echo -e "Usage: deploy.sh <command> <option>\n"
   echo "deploy.sh           deploy infrastructure with terraform and ansible"
-  echo "deploy.sh destroy   destroy managed infrastructure"""
+  echo "deploy.sh destroy   destroy managed infrastructure"
         exit
 fi
 
@@ -69,4 +69,5 @@ export TF_VAR_dns_zone_name=$DNS_ZONE_NAME
 export TF_VAR_dns_zone_project=$DNS_ZONE_PROJECT
 export TF_VAR_dns_zone_region=$DNS_ZONE_REGION
 
-terraform $command
+set +e
+terraform $command --auto-approve

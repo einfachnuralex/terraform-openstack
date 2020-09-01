@@ -2,31 +2,8 @@
 - hosts: masters[0]
   become: true
   tasks:
-    - name: Create File
-      file:
-        path: /home/ubuntu/test
-        state: touch
-        owner: ubuntu
-        group: ubuntu
-    - name: "Create test file"
-      blockinfile:
-        create: yes
-        path: /home/ubuntu/first_master
-        block: |
-          importante configurante
-
-- hosts: worker
-  become: true
-  tasks:
-    - name: Create File
-      file:
-        path: /home/ubuntu/test
-        state: touch
-        owner: ubuntu
-        group: ubuntu
-    - name: "Create test file"
-      blockinfile:
-        create: yes
-        path: /home/ubuntu/worker
-        block: |
-          importante configurante
+    - name: Update apt-get repo and cache
+      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+    
+    - name: Kubeadm init 
+      include_tasks: tasks/cluster-init.yaml

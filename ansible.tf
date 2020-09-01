@@ -33,18 +33,39 @@ resource "local_file" "create_ansible_inventory" {
   filename = "ansible/hosts.ini"
 }
 
-resource "null_resource" "ansible" {
+resource "local_file" "create_kubeadm_config" {
+  depends_on = [
+    openstack_networking_floatingip_v2.fip
+  ]
+
+  content = templatefile("config/kubeadm.tmpl", {
+    control_plane_endpoint = var.control_plane_endpoint
+    cluster_name           = var.cluster_name
+    k8s_version            = var.k8s_version
+    fip_address            = openstack_networking_floatingip_v2.fip.address
+    pod_dual_cidr          = "${var.pod_cidr_v4},${var.pod_cidr_v6}"
+    svc_dual_cidr          = "${var.svc_cidr_v4},${var.svc_cidr_v6}"
+  })
+  filename = "output/kubeadm.yaml"
+}
+
+resource "null_resource" "ansible_runner" {
   depends_on = [
     local_file.create_ansible_inventory,
     local_file.create_ansible_cfg,
     openstack_lb_member_v2.member_ssh
   ]
+  triggers = {
+    master = join(", ", [for instance in openstack_compute_instance_v2.master_nodes : instance.id])
+    workers = join(", ", [for instance in openstack_compute_instance_v2.worker_nodes : instance.id])
+  }
 
   provisioner "local-exec" {
     command = "cd ansible && ansible-playbook playbook.yaml"
 
     environment = {
       ANSIBLE_HOST_KEY_CHECKING = false
+      ANSIBLE_FORCE_COLOR       = 1
     }
   }
 }
