@@ -6,7 +6,7 @@
     path: /etc/kubernetes/pki/ca.key
   register: isInitialized
 
-## Tasks
+## Initialize Cluster
 - name: Copy file
   copy:
     src: ../output/kubeadm.yaml
@@ -15,11 +15,35 @@
 
 - name: Initialize the Kubernetes cluster using kubeadm
   command: kubeadm init --config /tmp/kubeadm.yaml
+  register: debugKubeadmInit
   when: not isInitialized.stat.exists
 
-- name: Get kubeadm join command
+- name: Get worker join command
   command: kubeadm token create --print-join-command
-  register: kubeJoinCmd
+  register: workerJoinCmd
+  changed_when: False
+
+- name: Get certification key
+  shell: "kubeadm init phase upload-certs --upload-certs | tail -n 1"
+  register: kubeCertKey
+  changed_when: False
+
+- name: Get master join command
+  command: kubeadm token create --print-join-command --certificate-key {{ kubeCertKey.stdout }}
+  register: masterJoinCmd
+  changed_when: False
+
+- name: "Add master join command to dummy host"
+  add_host:
+    name: "masterJoin"
+    command: "{{ masterJoinCmd.stdout }}"
+  changed_when: False
+
+- name: "Add worker join command to dummy host"
+  add_host:
+    name: "workerJoin"
+    command: "{{ workerJoinCmd.stdout }}"
+  changed_when: False
 
 ## CleanUp
 - name: Remove unneeded config files

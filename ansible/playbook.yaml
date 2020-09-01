@@ -3,7 +3,28 @@
   become: true
   tasks:
     - name: Update apt-get repo and cache
-      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+      apt: "update_cache=yes force_apt_get=yes cache_valid_time=3600"
+    - name: Update and upgrade apt packages
+      apt:
+        upgrade: yes
+        update_cache: yes
     
     - name: Kubeadm init 
       include_tasks: tasks/cluster-init.yaml
+    - name: Install CNI
+      include_tasks: tasks/install-calico.yaml
+    - name: Install SKE stuff
+      include_tasks: tasks/stuff.yaml
+
+- hosts: masters[1:]
+  become: true
+  tasks:
+    - name: Join master node(s) to cluster
+      include_tasks: tasks/join-master.yaml
+
+- hosts: workers
+  become: true
+  tasks:
+    - name: Join worker node(s) to cluster
+      include_tasks: tasks/join-worker.yaml
+
