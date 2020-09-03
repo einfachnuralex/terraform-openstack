@@ -18,6 +18,8 @@
   register: debugKubeadmInit
   when: not isInitialized.stat.exists
 
+
+## Get necessary commands for further nodes
 - name: Get worker join command
   command: kubeadm token create --print-join-command
   register: workerJoinCmd

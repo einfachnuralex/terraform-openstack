@@ -1,14 +1,17 @@
 ---
-- hosts: masters[0]
+- hosts: all
   become: true
   tasks:
-    - name: Update apt-get repo and cache
-      apt: "update_cache=yes force_apt_get=yes cache_valid_time=3600"
-    - name: Update and upgrade apt packages
-      apt:
-        upgrade: yes
-        update_cache: yes
-    
+    - name: Update Operating System
+      include_tasks: tasks/apt-update.yaml
+
+- hosts: masters[0]
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  become: true
+  tasks:
+    - name: Install requirements
+      include_tasks: tasks/preperation.yaml
     - name: Kubeadm init 
       include_tasks: tasks/cluster-init.yaml
     - name: Install CNI
@@ -27,4 +30,5 @@
   tasks:
     - name: Join worker node(s) to cluster
       include_tasks: tasks/join-worker.yaml
+      
 

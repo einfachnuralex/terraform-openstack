@@ -1,0 +1,7 @@
+Compression   yes
+ForwardAgent    yes
+ForwardX11Trusted yes
+ForwardX11    yes
+TCPKeepAlive    yes
+ServerAliveInterval 18
+StrictHostKeyChecking no

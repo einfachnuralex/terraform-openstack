@@ -1,3 +1,4 @@
+## Copy yaml files
 - name: Copy file
   fetch:
     src: /etc/kubernetes/admin.conf
@@ -9,29 +10,24 @@
     src: ../output/cloud-config
     dest: /tmp/cloud-config
 
-- name: Apply cloud-config as secret 
-  command: kubectl create secret -n kube-system generic cloud-config --from-file=cloud.conf=/tmp/cloud-config
-  environment:
+- name: Create secret from file
+  command: kubectl create secret -n kube-system generic cloud-config --from-file=cloud.conf=/tmp/cloud-config -o yaml --dry-run=client
+  register: cloudConfigSecret
+
+- name: Apply secret
+  k8s:
+    state: present
+    kubeconfig: /etc/kubernetes/admin.conf
+    definition:
+      "{{ cloudConfigSecret.stdout }}"
+
+- name: Apply SKE Helm Chart
+  command: "{{ item }}"
+  with_items:
+  - helm repo add stackit https://registry.alpha.ske.eu01.stackit.cloud/chartrepo/stackit
+  - helm repo update
+  - helm upgrade --install skeinit stackit/ske-init -n kube-system --set global.clustername=$CLUSTER_NAME
+  environment: 
     KUBECONFIG: /etc/kubernetes/admin.conf
 
-- name: Install pip
-  apt:
-    pkg:
-      - 
-    state: present
 
-- name: Install Helm
-  become: false
-  command: pip install pyhelm && pip install grpcio
-
-- name: Install helm chart
-  helm:
-    host: localhost
-    chart:
-      name: stackit/ske-init
-      source:
-        type: repo
-        location: https://registry.alpha.ske.eu01.stackit.cloud/chartrepo/stackit
-    state: present
-    name: ske-init
-    namespace: kube-system

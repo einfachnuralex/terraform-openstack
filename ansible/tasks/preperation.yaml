@@ -1,0 +1,49 @@
+---
+- name: Install packages that allow apt to be used over HTTPS
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg-agent
+    - software-properties-common
+    - util-linux
+    - libseccomp2
+    - ipvsadm
+    - tar
+    - unzip
+    - python3-pip
+
+## hacky workaround, until we use a standard ubuntu image, not the SKE-image 
+## better to use ansible to install latest software instead of packer
+- name: Remove unneeded config files
+  file:
+    path: /usr/bin/kubectl
+    state: absent
+
+- name: install kubectl
+  snap:
+    name: kubectl
+    classic: yes
+    state: present
+
+- name: install helm
+  snap:
+    name: helm
+    classic: yes
+    state: present
+
+- name: upgrade pip to newest version
+  pip:
+    name: pip
+    extra_args: --upgrade
+
+- name: install python dependencys
+  pip:
+    name: 
+     - openshift
+     - PyYAML
