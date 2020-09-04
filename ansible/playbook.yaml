@@ -30,5 +30,3 @@
   tasks:
     - name: Join worker node(s) to cluster
       include_tasks: tasks/join-worker.yaml
-      
-
