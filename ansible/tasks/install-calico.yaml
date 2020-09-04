@@ -1,0 +1,18 @@
+## Install Calico
+- name: Copy calico yaml manifest
+  copy:
+    src: ../config/calico_v6.yaml
+    dest: /tmp/calico_v6.yaml
+    mode: '0644'
+
+- name: Install Calico Pod Network
+  k8s:
+    state: present
+    src: /tmp/calico_v6.yaml
+    kubeconfig: /etc/kubernetes/admin.conf
+
+## CleanUp-
+- name: Remove unneeded config files
+  file:
+    path: /tmp/calico_v6.yaml
+    state: absent

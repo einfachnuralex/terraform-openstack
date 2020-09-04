@@ -1,0 +1,34 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Update Operating System
+      include_tasks: tasks/apt-update.yaml
+
+- hosts: masters[0]
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  become: true
+  tasks:
+    - name: Install requirements
+      include_tasks: tasks/preperation.yaml
+    - name: Kubeadm init 
+      include_tasks: tasks/cluster-init.yaml
+    - name: Install CNI
+      include_tasks: tasks/install-calico.yaml
+    - name: Install SKE stuff
+      include_tasks: tasks/stuff.yaml
+
+- hosts: masters[1:]
+  become: true
+  tasks:
+    - name: Join master node(s) to cluster
+      include_tasks: tasks/join-master.yaml
+
+- hosts: workers
+  become: true
+  tasks:
+    - name: Join worker node(s) to cluster
+      include_tasks: tasks/join-worker.yaml
+      
+

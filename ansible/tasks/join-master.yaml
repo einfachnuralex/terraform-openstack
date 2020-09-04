@@ -1,0 +1,12 @@
+---
+## Checks
+# check if node is already joined
+- name: Check if master is already joined
+  stat:
+    path: /etc/kubernetes/pki/ca.key
+  register: isJoined
+
+- name: Join master node to cluster
+  command: "{{ hostvars['masterJoin']['command'] }}"
+  register: debugKubeadmMasterJoin
+  when: not isJoined.stat.exists

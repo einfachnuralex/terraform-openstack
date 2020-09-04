@@ -42,9 +42,32 @@ resource "openstack_networking_subnetpool_v2" "subnet_pool_v6" {
 }
 
 # port creation
-resource "openstack_networking_port_v2" "port_instance" {
-  for_each           = setunion(var.master_node_names, var.worker_node_names)
-  name               = format("%s-%s", var.cluster_name, each.key)
+resource "openstack_networking_port_v2" "port_master" {
+  count = var.master_count
+  name               = format("%s-%s", var.cluster_name, "mp${count.index}")
+  network_id         = openstack_networking_network_v2.infra_net.id
+  security_group_ids = [openstack_networking_secgroup_v2.internal.id]
+  admin_state_up     = "true"
+
+  fixed_ip {
+    subnet_id = openstack_networking_subnet_v2.subnet_v4.id
+  }
+
+  fixed_ip {
+    subnet_id = openstack_networking_subnet_v2.subnet_v6.id
+  }
+
+  allowed_address_pairs {
+    ip_address = var.pod_cidr_v4
+  }
+  allowed_address_pairs {
+    ip_address = var.pod_cidr_v6
+  }
+}
+
+resource "openstack_networking_port_v2" "port_worker" {
+  count = var.worker_count
+  name               = format("%s-%s", var.cluster_name, "wp${count.index}")
   network_id         = openstack_networking_network_v2.infra_net.id
   security_group_ids = [openstack_networking_secgroup_v2.internal.id]
   admin_state_up     = "true"
