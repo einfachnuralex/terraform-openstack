@@ -2,13 +2,12 @@ resource "local_file" "create_ansible_cfg" {
   depends_on = [
     openstack_lb_loadbalancer_v2.elastic_lb
   ]
-
   content  = <<-EOF
     [defaults]
     inventory = ./hosts.ini
 
     [ssh_connection]
-    ssh_args = -F ./ssh_config -o ControlMaster=auto -o ControlPersist=30m -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ForwardAgent=yes -o ProxyCommand="ssh -W %h:%p ${var.ssh_user}@${openstack_networking_floatingip_v2.fip.address} -p 22"
+    ssh_args = -o ProxyCommand="ssh -F ./ssh_config -W %h:%p ${var.ssh_user}@${openstack_networking_floatingip_v2.fip.address} -p 22"
   EOF
   filename = "ansible/ansible.cfg"
 }

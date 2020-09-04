@@ -1,7 +1,10 @@
-Compression   yes
 ForwardAgent    yes
 ForwardX11Trusted yes
 ForwardX11    yes
 TCPKeepAlive    yes
-ServerAliveInterval 18
+ServerAliveInterval 10
+ServerAliveCountMax 3
 StrictHostKeyChecking no
+ControlMaster auto
+ControlPersist 30m
+UserKnownHostsFile /dev/null
