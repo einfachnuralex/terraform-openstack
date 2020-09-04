@@ -7,7 +7,7 @@ resource "local_file" "create_ansible_cfg" {
     inventory = ./hosts.ini
 
     [ssh_connection]
-    ssh_args = -o ProxyCommand="ssh -F ./ssh_config -W %h:%p ${var.ssh_user}@${openstack_networking_floatingip_v2.fip.address} -p 22"
+    ssh_args = -o ProxyCommand="ssh -F ./ssh_config -W %h:%p ${var.ssh_user}@${openstack_networking_floatingip_v2.fip.address} -p 2222"
   EOF
   filename = "ansible/ansible.cfg"
 }
