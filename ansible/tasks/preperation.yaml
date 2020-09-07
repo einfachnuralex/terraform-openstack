@@ -1,8 +1,21 @@
 ---
+- name: Generate /etc/hosts file
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+
+- name: Wait for automatic system updates
+  become: true
+  shell: while sudo fuser /var/lib/dpkg/{{ item }} >/dev/null 2>&1; do sleep 1; done;
+  with_items:
+    - lock
+    - lock-frontend
+
 - name: Install packages that allow apt to be used over HTTPS
   apt:
     name: "{{ packages }}"
     state: present
+    update_cache: yes
   vars:
     packages:
     - apt-transport-https
