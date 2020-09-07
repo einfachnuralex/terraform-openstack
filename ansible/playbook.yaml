@@ -1,10 +1,4 @@
 ---
-- hosts: all
-  become: true
-  tasks:
-    - name: Update Operating System
-      include_tasks: tasks/apt-update.yaml
-
 - hosts: masters[0]
   vars:
     ansible_python_interpreter: /usr/bin/python3
@@ -30,5 +24,3 @@
   tasks:
     - name: Join worker node(s) to cluster
       include_tasks: tasks/join-worker.yaml
-      
-

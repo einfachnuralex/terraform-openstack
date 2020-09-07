@@ -1,5 +1,6 @@
 # Create loadbalancer
 resource "openstack_lb_loadbalancer_v2" "elastic_lb" {
+  depends_on = [openstack_networking_network_v2.infra_net]
   name           = "${var.cluster_name}-lb-tcp"
   vip_network_id = openstack_networking_network_v2.infra_net.id
   //vip_subnet_id = openstack_networking_subnet_v2.subnet_v4.id
@@ -66,5 +67,5 @@ resource "openstack_lb_monitor_v2" "monitor_1" {
 # Associate floating-ip to the lb port
 resource "openstack_networking_floatingip_v2" "fip" {
   pool    = "floating-net"
-  port_id = openstack_networking_port_v2.port_master.*.id[0]
+  port_id = openstack_lb_loadbalancer_v2.elastic_lb.vip_port_id
 }
