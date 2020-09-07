@@ -5,9 +5,10 @@ resource "local_file" "create_ansible_cfg" {
   content  = <<-EOF
     [defaults]
     inventory = ./hosts.ini
+    private_key_file = ../${var.private_key_path}
 
     [ssh_connection]
-    ssh_args = -o ProxyCommand="ssh -F ./ssh_config -W %h:%p ${var.ssh_user}@${openstack_networking_floatingip_v2.fip.address} -p 2222"
+    ssh_args = -i ../${var.private_key_path} -o ProxyCommand="ssh -F ./ssh_config -W %h:%p -i ../${var.private_key_path} ${var.ssh_user}@${openstack_networking_floatingip_v2.fip.address} -p 2222"
   EOF
   filename = "ansible/ansible.cfg"
 }
