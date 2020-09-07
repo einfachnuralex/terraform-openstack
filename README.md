@@ -7,7 +7,11 @@
 - Copy `private key` to `auth/ske-key`
 
 ## Installation
-`./deploy.sh`
+1. Check files and naming in `auth/` folder
+1. Configure variables in `deploy.sh` (above script section)
+1. run script with
+```
+./deploy.sh
+```
 
-## Preparation 
 
