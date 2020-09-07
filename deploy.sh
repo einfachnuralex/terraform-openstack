@@ -70,4 +70,4 @@ export TF_VAR_dns_zone_project=$DNS_ZONE_PROJECT
 export TF_VAR_dns_zone_region=$DNS_ZONE_REGION
 
 set +e
-terraform $command --auto-approve
+terraform $command
